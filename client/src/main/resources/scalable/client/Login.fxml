@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<GridPane hgap="14.0" maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scalable.client.LoginController">
+  <children>
+    <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="TOP">
+      <image>
+        <!-- place holder -->
+      </image>
+    </ImageView>
+      <GridPane hgap="10.0" GridPane.columnIndex="1">
+         <columnConstraints>
+            <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="412.1414794921875" minWidth="10.0" prefWidth="387.43028259277344" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="NEVER" />
+         </rowConstraints>
+         <children>
+          <VBox alignment="CENTER_LEFT" fillWidth="false" maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" spacing="7.0" GridPane.valignment="CENTER">
+               <children>
+                  <Label text="Username" />
+                  <Label text="Password" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+          </VBox>
+            <VBox layoutX="10.0" layoutY="10.0" maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" spacing="7.0" GridPane.columnIndex="1">
+               <children>
+                  <TextField fx:id="usernameField" onKeyTyped="#onKeyTyped" prefWidth="2000000.0" promptText="username" />
+                  <PasswordField fx:id="passwordField" onKeyTyped="#onKeyTyped" promptText="password" />
+               </children>
+            </VBox>
+         </children>
+      </GridPane>
+    <HBox maxHeight="-Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <children>
+        <HBox fx:id="actionParent" alignment="CENTER">
+          <HBox.margin>
+            <Insets />
+          </HBox.margin>
+        </HBox>
+            <StackPane maxWidth="1.7976931348623157E308">
+               <children>
+                  <Text fx:id="failedText" fill="#ee0303" strokeType="OUTSIDE" strokeWidth="0.0" text="Login Failed: Incorrect Password, or Username not available" textOrigin="TOP" visible="false" />
+                  <Text fx:id="timedOutText" fill="#ed9305" layoutX="10.0" layoutY="15.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Login timed out, please try again" textOrigin="TOP" visible="false" />
+               </children>
+            </StackPane>
+        <Button fx:id="exitButton" cancelButton="true" minWidth="80.0" mnemonicParsing="false" onAction="#exit" text="Exit" HBox.hgrow="NEVER">
+          <HBox.margin>
+            <Insets />
+          </HBox.margin>
+        </Button>
+        <HBox fx:id="okParent" alignment="CENTER">
+          <children>
+            <Button fx:id="okButton" defaultButton="true" minWidth="80.0" mnemonicParsing="false" onAction="#login" text="Login" HBox.hgrow="NEVER">
+              <HBox.margin>
+                <Insets left="14.0" />
+              </HBox.margin>
+            </Button>
+          </children>
+        </HBox>
+      </children>
+    </HBox>
+  </children>
+  <columnConstraints>
+    <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+    <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="+Infinity" minWidth="-Infinity" />
+  </columnConstraints>
+  <padding>
+    <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+  </padding>
+  <rowConstraints>
+    <RowConstraints maxHeight="+Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="ALWAYS" />
+    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+  </rowConstraints>
+</GridPane>

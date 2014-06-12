@@ -1,0 +1,7 @@
+libraryDependencies ++= {
+  Seq(
+    "org.reactivemongo"   %%   "reactivemongo-bson"      % reactiveMongoVersion.value,
+    "org.specs2"          %%  "specs2"                   % "2.3.12" % "test",
+    "com.typesafe.akka"   %%  "akka-actor"               % akkaVersion.value
+    )
+}
