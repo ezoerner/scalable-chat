@@ -4,7 +4,6 @@ import java.net.InetSocketAddress
 
 import akka.actor.ActorRef
 import akka.io.Tcp._
-import scalable.Global
 import scalable.infrastructure.api.{AskLogin, LoginResult, ResultStatus}
 import scalable.server.{AkkaTestkitSpecs2Support, Configuration}
 import org.specs2.mutable.Specification
@@ -18,7 +17,6 @@ abstract class TcpClientAndServer extends AkkaTestkitSpecs2Support {
   def tcpService = system.actorOf(TcpService.props(self))
   def clientProps =  TestClient.props(new InetSocketAddress(Configuration.host, Configuration.portTcp), self)
   def clientAndServer: (ActorRef, ActorRef) = {
-    Global._defaultSystem = system
     tcpService ! NotifyOnBound()
     expectMsgType[Bound]
     val client = system.actorOf(clientProps)

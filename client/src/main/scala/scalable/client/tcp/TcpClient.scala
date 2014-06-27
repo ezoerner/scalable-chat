@@ -24,11 +24,7 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
   IO(Tcp) ! Connect(remote)
 
   private def handleDataReceived(data: ByteString): Unit = {
-    val message = SerializableMessage(data)
-    def warn(msg: SerializableMessage[_]) =
-      log.warning(s"Received $msg with no listener")
-
-    message match {
+    SerializableMessage(data) match {
       case msg: LoginResult ⇒
         log.debug(s"received $msg")
         log.debug(s"Sending LoginResult to ${msg.replyTo}")
@@ -52,13 +48,13 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
       val connection = sender()
       connection ! Register(self)
       context become {
-        case msg: AskLogin1 ⇒
+        case msg: ClientAskLogin ⇒
           log.debug(s"Received $msg from ${sender()}")
           connection ! Write(AskLogin(msg.username, msg.password, sender()).toByteString)
         case msg: Join ⇒
           log.debug(s"Writing $msg")
           connection ! Write(msg.toByteString)
-        case msg: AskParticipants1 ⇒
+        case msg: ClientAskParticipants ⇒
           log.debug(s"Writing $msg")
           connection ! Write(AskParticipants(msg.roomName, sender()).toByteString)
         case Received(data) =>
@@ -77,6 +73,14 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
   }
 }
 
-// short form of AskLogin to be filled in with replyTo
-case class AskLogin1(username: String, password: String)
-case class AskParticipants1(roomName: String)
+trait CorrelatedRequest {
+  def remoteRequest(replyTo: ActorRef): SerializableMessage[_]
+}
+
+case class ClientAskLogin(username: String, password: String) extends CorrelatedRequest {
+  def remoteRequest(replyTo: ActorRef) = AskLogin(username, password, replyTo)
+}
+
+case class ClientAskParticipants(roomName: String) extends CorrelatedRequest {
+  def remoteRequest(replyTo: ActorRef) = AskParticipants(roomName, replyTo)
+}

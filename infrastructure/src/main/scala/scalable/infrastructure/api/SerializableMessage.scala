@@ -1,6 +1,6 @@
 package scalable.infrastructure.api
 
-import akka.actor.ActorRef
+import akka.actor.{ActorSystem, ActorRef}
 import akka.util.ByteString
 import reactivemongo.bson._
 import reactivemongo.bson.buffer.{ArrayBSONBuffer, ArrayReadableBuffer, DefaultBufferHandler, WritableBuffer}
@@ -22,11 +22,11 @@ import scalable.infrastructure.api.ResultStatus._
 object SerializableMessage {
 
   def apply(byteString: ByteString)
-           (implicit reader: BSONReader[BSONDocument, SerializableMessage[_]]): SerializableMessage[_] = {
+           (implicit reader: BSONReader[BSONDocument, SerializableMessage[_]],
+            system: ActorSystem): SerializableMessage[_] = {
     val bsonDocument = DefaultBufferHandler.readDocument(ArrayReadableBuffer(byteString.toArray)).get
     BSON.readDocument[SerializableMessage[_]](bsonDocument)
   }
-
 
   implicit object MessageReader extends BSONDocumentReader[SerializableMessage[_]] {
     def read(doc: BSONDocument): SerializableMessage[_] = {

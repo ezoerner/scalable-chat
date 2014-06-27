@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
-import scalable.client.tcp.AskLogin1
+import scalable.client.tcp.ClientAskLogin
 import scalable.infrastructure.api.LoginResult
 import scalable.infrastructure.api.ResultStatus._
 
@@ -46,7 +46,7 @@ class LoginController(private val usernameField: TextField,
 
     log.debug("Asking the tcpClient with Login")
     val futureResponse =
-      (tcpClient ? AskLogin1(usernameField.text.value, passwordField.text.value)).mapTo[LoginResult]
+      (tcpClient ? ClientAskLogin(usernameField.text.value, passwordField.text.value)).mapTo[LoginResult]
 
     futureResponse.onSuccess{
       case LoginResult(Ok, username, _) if username == usernameField.text.value ⇒

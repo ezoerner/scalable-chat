@@ -34,8 +34,10 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   assert(onlineTitledPane != null)
   accordion.expandedPane = onlineTitledPane
 
-  chatHandler.addChatListener(this, RoomName)
-  chatHandler.join(username, RoomName)
+  Platform.runLater {
+    chatHandler.addChatListener(this, RoomName)
+    chatHandler.join(username, RoomName)
+  }
 
   override def joined(username: String, roomName: String): Unit = {
     assert(roomName == RoomName)

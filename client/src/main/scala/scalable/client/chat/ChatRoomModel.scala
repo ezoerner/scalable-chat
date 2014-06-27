@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
 import scalable.client._
-import scalable.client.tcp.AskParticipants1
+import scalable.client.tcp.ClientAskParticipants
 import scalable.infrastructure.api.Participants
 
 import scala.concurrent.Await
@@ -23,7 +23,7 @@ class ChatRoomModel(val roomName: String, private val system: ActorSystem) {
 
   def initialize() = {
     val tcpClient = tcpClientSelection(system)
-    val futureResponse = (tcpClient ? AskParticipants1(roomName)).mapTo[Participants]
+    val futureResponse = (tcpClient ? ClientAskParticipants(roomName)).mapTo[Participants]
     online.clear()
     val participants = Await.result(futureResponse, 2.seconds)
     online.insertAll(0, participants.participants)

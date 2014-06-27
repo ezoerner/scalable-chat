@@ -2,7 +2,7 @@ package scalable.client
 
 import akka.actor._
 import com.typesafe.config.ConfigFactory
-import scalable.Global
+import scalable.GlobalEnv
 
 import scala.reflect.runtime.universe.typeOf
 import scala.util.control.NonFatal
@@ -18,8 +18,7 @@ import scalafxml.core.DependenciesByType
  */
 
 object Main extends JFXApp  {
-  lazy val actorSystem = ActorSystem("Main")
-  Global._defaultSystem = actorSystem
+  lazy val actorSystem = GlobalEnv.createActorSystem("Main")
 
   def dependencies = new DependenciesByType(Map(typeOf[ActorSystem] -> actorSystem))
   val root = loadFxmlFile("Login.fxml", dependencies)
@@ -33,7 +32,7 @@ object Main extends JFXApp  {
     val root = try {
       actorSystem.actorOf(ClientApp.props, ClientApp.path)
     } catch {
-      case NonFatal(e) ⇒ actorSystem.shutdown(); throw e
+      case NonFatal(e) ⇒ GlobalEnv.shutdownActorSystem(); throw e
     }
     actorSystem.actorOf(Terminator.props(root), Terminator.path)
 

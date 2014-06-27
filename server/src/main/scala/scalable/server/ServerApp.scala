@@ -1,7 +1,7 @@
 package scalable.server
 
 import akka.actor._
-import scalable.Global
+import scalable.GlobalEnv
 import scalable.infrastructure.api.{AskLogin, AskParticipants, Join}
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{NewConnection, TcpService}
@@ -19,7 +19,6 @@ object ServerApp {
 
 class ServerApp extends Actor with ActorLogging {
   log.debug(s"Main Actor path=${self.path.toStringWithoutAddress}")
-  Global._defaultSystem = context.system
   context.actorOf(TcpService.props(self), "tcpService")
   lazy val lobbyChatRoom = context.actorOf(ChatRoom.props("Lobby"), "lobby")
 

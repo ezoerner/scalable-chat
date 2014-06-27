@@ -3,7 +3,7 @@ package scalable.infrastructure
 import akka.actor.ActorRef
 import akka.event.Logging
 import akka.serialization.SerializationExtension
-import scalable.Global._
+import scalable.GlobalEnv._
 import reactivemongo.bson._
 
 /**

@@ -6,6 +6,8 @@ scalaVersion in ThisBuild := "2.10.3"
 
 akkaVersion in ThisBuild := "2.3.3"
 
+parallelExecution in Test := false
+
 reactiveMongoVersion in ThisBuild := "0.10.0"
 
 version in ThisBuild := "1.0.0-SNAPSHOT"
@@ -17,7 +19,7 @@ lazy val client = project.dependsOn(server % "test->compile",
 
 lazy val server = project.dependsOn(infrastructure)
 
-lazy val root =
+lazy val scalable =
   project.in(file("."))
     .aggregate(infrastructure, client, server)
 

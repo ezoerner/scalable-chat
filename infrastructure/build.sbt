@@ -1,3 +1,5 @@
+parallelExecution in Test := false
+
 libraryDependencies ++= {
   Seq(
     "org.reactivemongo"   %%   "reactivemongo-bson"      % reactiveMongoVersion.value,

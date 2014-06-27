@@ -9,6 +9,7 @@ object TcpServer {
 
 class TcpServer(private val connection : ActorRef, private val listener: ActorRef)
 extends Actor with ActorLogging {
+  implicit val system = context.system
 
   import akka.io.Tcp._
 
