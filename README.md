@@ -3,6 +3,7 @@
 ### What is this repository for? ###
 
 * A sample multiuser application with a scalable architecture.
+* A chat room application that demonstrates persistence by storing chat history
 
 ### Technology Stack ###
 
