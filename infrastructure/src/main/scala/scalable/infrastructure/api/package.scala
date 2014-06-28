@@ -7,13 +7,14 @@ import scalable.GlobalEnv._
 import reactivemongo.bson._
 
 /**
- * Implicit BSON readers and writers.
+ * Implicit BSON readers and writers for ActorRefs.
+ * Uses the global ActorSystem, so will not function if the global actor system
+ * has not been initialized or has been shutdown.
+ * @see GlobalEnv
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 package object api {
-  private lazy val log = Logging(system, this.getClass)
-
 
   trait SerializableReader[T <: Serializable] extends BSONReader[BSONBinary, T] {
     val clazz: Class[T]

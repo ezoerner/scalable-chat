@@ -16,7 +16,7 @@ object ChatRoom {
 class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
   var participants = Map[String, ActorRef]()
 
-  def broadcast(msg: SerializableMessage[_]): Unit =
+  def broadcast(msg: SerializableMessage): Unit =
     participants.values.foreach(_ ! msg)
 
   override def receive = {

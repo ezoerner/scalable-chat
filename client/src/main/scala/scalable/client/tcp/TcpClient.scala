@@ -74,7 +74,7 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
 }
 
 trait CorrelatedRequest {
-  def remoteRequest(replyTo: ActorRef): SerializableMessage[_]
+  def remoteRequest(replyTo: ActorRef): SerializableMessage
 }
 
 case class ClientAskLogin(username: String, password: String) extends CorrelatedRequest {

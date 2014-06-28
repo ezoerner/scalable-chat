@@ -1,7 +1,6 @@
 package scalable.server
 
 import akka.actor._
-import scalable.GlobalEnv
 import scalable.infrastructure.api.{AskLogin, AskParticipants, Join}
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{NewConnection, TcpService}
