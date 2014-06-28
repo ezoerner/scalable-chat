@@ -48,15 +48,12 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
       val connection = sender()
       connection ! Register(self)
       context become {
-        case msg: ClientAskLogin ⇒
+        case msg: CorrelatedRequest ⇒
           log.debug(s"Received $msg from ${sender()}")
-          connection ! Write(AskLogin(msg.username, msg.password, sender()).toByteString)
-        case msg: Join ⇒
+          connection ! Write(msg.remoteRequest(sender()).toByteString)
+        case msg: SerializableMessage ⇒
           log.debug(s"Writing $msg")
           connection ! Write(msg.toByteString)
-        case msg: ClientAskParticipants ⇒
-          log.debug(s"Writing $msg")
-          connection ! Write(AskParticipants(msg.roomName, sender()).toByteString)
         case Received(data) =>
           handleDataReceived(data)
         case CommandFailed(w: Write) =>
@@ -78,9 +75,9 @@ trait CorrelatedRequest {
 }
 
 case class ClientAskLogin(username: String, password: String) extends CorrelatedRequest {
-  def remoteRequest(replyTo: ActorRef) = AskLogin(username, password, replyTo)
+  override def remoteRequest(replyTo: ActorRef) = AskLogin(username, password, replyTo)
 }
 
 case class ClientAskParticipants(roomName: String) extends CorrelatedRequest {
-  def remoteRequest(replyTo: ActorRef) = AskParticipants(roomName, replyTo)
+  override def remoteRequest(replyTo: ActorRef) = AskParticipants(roomName, replyTo)
 }
