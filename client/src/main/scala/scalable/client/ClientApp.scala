@@ -22,7 +22,7 @@ import akka.actor._
 import akka.io.Tcp.Connected
 import scalable.client.chat.ChatHandler
 import scalable.client.tcp.TcpClient
-import scalable.infrastructure.api.{Join, Joined}
+import scalable.infrastructure.api.{Chat, Join, Joined}
 
 import scala.reflect.runtime.universe.typeOf
 import scalafx.application.JFXApp.PrimaryStage
@@ -58,12 +58,14 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
     ()
   }
 
-  override def join(username: String, roomName: String) = tcpClient ! Join(username, roomName)
+  override def join(username: String, roomName: String) =
+    tcpClient ! Join(username, roomName)
 
   override def receive = {
-    case msg: Connected ⇒ log.debug("Client Connected")
+    case msg: Connected ⇒ log.info(msg.toString)
     case OpenLobby(username) ⇒ openLobby(username)
     case Joined(username, roomName) ⇒ handleJoined(username, roomName)
+    case Chat(id, username, roomName, htmlText) ⇒ handleChat(id.get, username, roomName, htmlText)
     case msg ⇒ log.info(s"Supervisor received: $msg")
   }
 }

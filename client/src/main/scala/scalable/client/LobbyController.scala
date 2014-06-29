@@ -16,13 +16,21 @@
 
 package scalable.client
 
+import java.text.DateFormat
+import java.util.{Date, UUID}
+import javafx.beans.value.{ChangeListener, ObservableValue}
+
 import akka.actor.ActorSystem
 import akka.event.Logging
-import scalable.client.chat.{ChatHandler, ChatListener, ChatRoomModel}
 
+import scalable.client.chat.views.Browser
+import scalable.client.chat.{ChatHandler, ChatListener, ChatRoomModel}
 import scalafx.application.Platform
-import scalafx.scene.control.{Accordion, ListView, TitledPane}
+import scalafx.event.ActionEvent
+import scalafx.scene.control._
+import scalafx.scene.layout._
 import scalafx.scene.text.Text
+import scalafx.scene.web._
 import scalafxml.core.macros.sfxml
 
 /**
@@ -37,12 +45,20 @@ class LobbyController(private val onlineTitledPane: TitledPane,
                       private val chatHandler: ChatHandler,
                       private val usernameText: Text,
                       private val username: String,
-                      private val onlineListView: ListView[String])
+                      private val onlineListView: ListView[String],
+                      private val chatEditor: HTMLEditor,
+                      private val sendChat: Button,
+                      private val webViewParent: AnchorPane,
+                      private val chatScrollPane: ScrollPane)
     extends ChatListener {
   private val log = Logging(actorSystem, this.getClass)
   private val RoomName = "Lobby"
+  private val browser = new Browser("")
+  private val htmlBuilder = new StringBuilder(browser.getHtml(""))
+  private var insertionIndex = browser.getHtml("").indexOf("</div>")
+  private val format = DateFormat.getDateTimeInstance
   private val chatRoom = new ChatRoomModel(RoomName, actorSystem)
-  chatRoom.initialize()
+
   onlineListView.items = chatRoom.online
 
   usernameText.text = username
@@ -50,13 +66,26 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   assert(onlineTitledPane != null)
   accordion.expandedPane = onlineTitledPane
 
+
+  webViewParent.children.add(browser)
+  webViewParent.width.addListener(new ChangeListener[Any] {
+    override def changed(observable: ObservableValue[_], oldValue: Any, newValue: Any): Unit = {
+      browser.setPrefWidth(newValue.asInstanceOf[Double])
+    }
+  })
+
+  browser.heightProperty().addListener(new ChangeListener[Any] {
+    override def changed(observable: ObservableValue[_], oldValue: Any, newValue: Any): Unit = {
+      chatScrollPane.vvalue = newValue.asInstanceOf[Double]
+    }
+  })
+
   Platform.runLater {
     chatHandler.addChatListener(this, RoomName)
     chatHandler.join(username, RoomName)
   }
 
-  override def joined(username: String, roomName: String): Unit = {
-    assert(roomName == RoomName)
+  override def joined(username: String): Unit = {
     log.debug(s"$username joined Lobby")
     Platform.runLater {
       if (chatRoom.online.add(username)) {
@@ -64,4 +93,46 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       }
     }
   }
+
+  override def receiveChat(id: UUID, sender: String, htmlText: String): Unit = {
+    // TODO: consider using eaio.uuid library to insert message in sorted order
+    // TODO: based directly on the time-based UUID
+    appendToChatGrid(unixTimestamp(id), sender, htmlText)
+  }
+
+  def sendChat(event: ActionEvent) = {
+
+    def extractNewContent(htmlString: String) = {
+      val beginBody = htmlString.indexOf("<body")
+      val begin = htmlString.indexOf('>', beginBody) + 1
+      val end = htmlString.lastIndexOf("</body>")
+      htmlString.substring(begin, end)
+    }
+
+    val html = extractNewContent(chatEditor.htmlText)
+    log.debug(s"HTML: $html")
+    chatRoom.sendChat(username, html)
+  }
+
+  def appendToChatGrid(timestamp: Long, sender: String, htmlText: String) = {
+      def header = {
+        val (r,g,b) = if (sender == username) (204, 255, 255) else (253, 246, 227)
+        s"""<p><font size="2" face="Courier" style="background-color: rgb($r, $g, $b);" color="#1a3399">
+           |$sender | ${format.format(new Date(timestamp))}</font></p>""".stripMargin
+      }
+
+      def integrateNewContent(content: String): String = {
+        // TODO: insert in correct order based on timestamp
+        val divString = "<div>" + header + content + s"""<hr style="$HrStyle"/></div>"""
+        htmlBuilder.insert(insertionIndex, divString)
+        insertionIndex = insertionIndex + divString.length
+        htmlBuilder.mkString
+      }
+
+    val newHtmlText = integrateNewContent(htmlText)
+    log.debug(s"New HTML=$newHtmlText")
+    browser.setContent(newHtmlText)
+  }
+
+  private val HrStyle = "height: 12px;border: 0;box-shadow: inset 0 12px 12px -12px rgba(0,0,0,0.5);"
 }

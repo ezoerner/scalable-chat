@@ -7,6 +7,7 @@ libraryDependencies ++= {
     "org.scalafx"         %%  "scalafx"                 % "8.0.0-R4",
     "org.scalafx"         %%  "scalafxml-core"          % "0.2",
     "org.specs2"          %%  "specs2"                  % "2.3.12" % "test"
+    //"com.eaio.uuid"       %   "uuid"                    % "3.2"
   )
 }
 

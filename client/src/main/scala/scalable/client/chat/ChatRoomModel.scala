@@ -21,7 +21,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import scalable.client._
 import scalable.client.tcp.ClientAskParticipants
-import scalable.infrastructure.api.Participants
+import scalable.infrastructure.api.{Chat, Participants}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -33,17 +33,16 @@ import scalafx.collections.ObservableBuffer
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 class ChatRoomModel(val roomName: String, private val system: ActorSystem) {
-  private implicit val timeout: Timeout = 2.second
+
+  private implicit val timeout: Timeout = 5.second // TODO: make this configurable
 
   val online = ObservableBuffer[String]()
+  val tcpClient = tcpClientSelection(system)
+  val futureResponse = (tcpClient ? ClientAskParticipants(roomName)).mapTo[Participants]
+  online.clear()
+  val participants = Await.result(futureResponse, 2.seconds)
+  online.insertAll(0, participants.participants)
 
-  def initialize() = {
-    val tcpClient = tcpClientSelection(system)
-    val futureResponse = (tcpClient ? ClientAskParticipants(roomName)).mapTo[Participants]
-    online.clear()
-    val participants = Await.result(futureResponse, 2.seconds)
-    online.insertAll(0, participants.participants)
-  }
-
+  def sendChat(username: String, htmlText: String) = tcpClient ! Chat(None, username, roomName, htmlText)
 
 }

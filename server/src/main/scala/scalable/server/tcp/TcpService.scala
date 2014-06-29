@@ -40,7 +40,7 @@ class TcpService(private val listener: ActorRef) extends Actor with ActorLogging
   override def receive = {
 
     case b @ Bound(localAddr) =>
-      log.debug(s"Received $b")
+      log.info(s"Successfully $b")
       localAddress = Some(localAddr)
       bindListener.fold(()){_ ! b}
 

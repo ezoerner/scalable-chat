@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.web.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -34,7 +35,7 @@
   ~ limitations under the License.
   -->
 
-<SplitPane fx:id="root" dividerPositions="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scalable.client.LobbyController">
+<SplitPane fx:id="root" dividerPositions="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scalable.client.LobbyController">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
          <children>
@@ -45,8 +46,8 @@
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                      </columnConstraints>
                      <rowConstraints>
-                        <RowConstraints vgrow="NEVER" />
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="20.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
                      </rowConstraints>
                      <children>
                         <TextFlow>
@@ -59,22 +60,27 @@
                               </Text>
                            </children>
                         </TextFlow>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" GridPane.rowIndex="1">
+                        <AnchorPane GridPane.rowIndex="1">
                            <children>
-                              <ListView prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <ScrollPane fx:id="chatScrollPane" fitToWidth="true" hbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <content>
+                                  <AnchorPane fx:id="webViewParent" minHeight="0.0" minWidth="0.0" GridPane.rowIndex="1" />
+                                 </content>
+                              </ScrollPane>
                            </children>
                         </AnchorPane>
                      </children>
                   </GridPane>
-                <AnchorPane minHeight="-Infinity" minWidth="0.0" prefHeight="50.0" SplitPane.resizableWithParent="false">
+                <AnchorPane minHeight="-Infinity" minWidth="0.0" prefHeight="150.0" SplitPane.resizableWithParent="false">
                      <children>
-                        <TextArea minHeight="-Infinity" promptText="Enter Chat Message" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <HTMLEditor fx:id="chatEditor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;Enter Chat Message&lt;/body&gt;&lt;/html&gt;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <Button mnemonicParsing="false" onAction="#sendChat" text="SEND CHAT MESSAGE" textAlignment="CENTER" textFill="#009000" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
                      </children>
                   </AnchorPane>
               </items>
             </SplitPane>
          </children></AnchorPane>
-      <SplitPane dividerPositions="1.0" maxWidth="1.7976931348623157E308" minWidth="200.0" orientation="VERTICAL" prefWidth="200.0" SplitPane.resizableWithParent="false">
+      <SplitPane dividerPositions="1.0" maxWidth="1.7976931348623157E308" minWidth="200.0" orientation="VERTICAL" prefWidth="150.0" SplitPane.resizableWithParent="false">
          <items>
             <Accordion fx:id="accordion">
               <panes>
@@ -99,7 +105,7 @@
                 </TitledPane>
               </panes>
             </Accordion>
-            <ScrollPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="50.0" prefHeight="100.0" prefViewportHeight="76.0" prefViewportWidth="202.0" prefWidth="200.0" GridPane.rowIndex="1" SplitPane.resizableWithParent="false">
+            <ScrollPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="50.0" prefHeight="100.0" prefViewportHeight="76.0" prefViewportWidth="202.0" prefWidth="150.0" GridPane.rowIndex="1" SplitPane.resizableWithParent="false">
                <content>
                   <TextFlow />
                </content>

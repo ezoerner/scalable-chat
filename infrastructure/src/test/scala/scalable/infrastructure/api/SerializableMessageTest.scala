@@ -16,6 +16,8 @@
 
 package scalable.infrastructure.api
 
+import java.util.UUID
+
 import akka.actor.{Actor, Props}
 import scalable.GlobalEnv
 import scalable.infrastructure.api.ResultStatus._
@@ -66,6 +68,13 @@ class SerializableMessageTest extends Specification {
       val newJoined = SerializableMessage(bytes)
       GlobalEnv.shutdownActorSystem()
       joined === newJoined
+    }
+  }
+
+  "A UUID" should {
+    "convert to BSONBinary and back" in {
+      val uuid: UUID = UUID.randomUUID()
+      UuidReader.read(UuidWriter.write(uuid)) === uuid
     }
   }
 

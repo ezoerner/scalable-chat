@@ -16,6 +16,8 @@
 
 package scalable.client.chat
 
+import java.util.UUID
+
 import akka.actor.ActorLogging
 
 /**
@@ -27,12 +29,16 @@ import akka.actor.ActorLogging
 trait ChatHandler {
   this: ActorLogging ⇒
 
-  def warn() = log.warning(s"Received joined with no listener")
+  def noListener(roomName: String) = log.error(s"Could not find chat room $roomName")
 
   var listeners = Map[String, ChatListener]()
 
   def handleJoined(username: String, roomName: String) =  {
-    listeners.get(roomName).fold(warn())(listener ⇒ listener.joined(username, roomName))
+    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.joined(username))
+  }
+
+  def handleChat(id: UUID, username: String, roomName: String, htmlText: String) = {
+    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveChat(id, username, htmlText))
   }
 
   def addChatListener(listener: ChatListener, room: String) = {
@@ -44,5 +50,6 @@ trait ChatHandler {
 }
 
 trait ChatListener {
-  def joined(username: String, roomName: String): Unit
+  def joined(username: String): Unit
+  def receiveChat(id: UUID, sender: String, htmlText: String) : Unit
 }

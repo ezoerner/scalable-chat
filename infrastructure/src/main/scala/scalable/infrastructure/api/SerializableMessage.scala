@@ -16,6 +16,8 @@
 
 package scalable.infrastructure.api
 
+import java.util.UUID
+
 import akka.actor.{ActorSystem, ActorRef}
 import akka.event.Logging
 import akka.util.ByteString
@@ -27,7 +29,7 @@ import scalable.GlobalEnv
 
 object MessageType extends Enumeration {
   type MessageType = Value
-  val AskLoginType, LoginResultType, JoinType, JoinedType, AskParticipantsType, ParticipantsType = Value
+  val AskLoginType, LoginResultType, JoinType, JoinedType, AskParticipantsType, ParticipantsType, ChatType = Value
 }
 import scalable.infrastructure.api.MessageType._
 
@@ -44,7 +46,7 @@ object SerializableMessage {
   private lazy val deserializers: mutable.Map[MessageType, MessageDeserializer] = mutable.Map()
 
   def registerDeserializer(messageType: MessageType, deserializer: BSONDocument ⇒ SerializableMessage) = {
-    log.debug(s"Registering deserializer $deserializer")
+    log.debug(s"Registering deserializer $messageType → ${deserializer.getClass}")
     deserializers += (messageType → deserializer)
   }
 
@@ -71,12 +73,12 @@ object SerializableMessage {
   // because objects are instantiated lazily, unfortunately we need to make sure all
   // the message deserializers are eagerly created so they can register themselves
   // before an incoming message is received
-  (AskLogin, AskParticipants, Join, Joined, LoginResult, Participants)
+  val _ = List(AskLogin, AskParticipants, Join, Joined, LoginResult, Participants, Chat)
 }
 
 import SerializableMessage.MessageDeserializer
 
-trait SerializableMessage {
+sealed trait SerializableMessage {
 
   def toByteString(implicit writer: BSONWriter[SerializableMessage, BSONDocument]): ByteString = {
     val bson: BSONDocument = BSON.write(this)
@@ -88,7 +90,7 @@ trait SerializableMessage {
   def toBsonDocument: BSONDocument
 }
 
-trait MessageFactory extends MessageDeserializer {
+sealed trait MessageFactory extends MessageDeserializer {
   val typeCode: MessageType
   SerializableMessage.registerDeserializer(typeCode, this)
 }
@@ -208,4 +210,28 @@ object Participants extends MessageFactory {
   )
 }
 
+// The id is a server-generated time-based UUID
+case class Chat(id: Option[UUID], sender: String, roomName: String, htmlText: String)
+  extends SerializableMessage {
+  import Chat._
+
+  override def toBsonDocument: BSONDocument = BSONDocument(
+    "type" → typeCode.id,
+    "id" → id,
+    "sender" → sender,
+    "roomName" → roomName,
+    "htmlText" → htmlText
+  )
+}
+
+object Chat extends MessageFactory {
+  override lazy val typeCode: MessageType = ChatType
+
+  override def apply(doc: BSONDocument): Chat = Chat(
+    doc.getAs[UUID]("id"),
+    doc.getAs[String]("sender").get,
+    doc.getAs[String]("roomName").get,
+    doc.getAs[String]("htmlText").get
+  )
+}
 

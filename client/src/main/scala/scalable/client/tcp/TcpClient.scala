@@ -45,12 +45,12 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
         log.debug(s"received $msg")
         log.debug(s"Sending LoginResult to ${msg.replyTo}")
         msg.replyTo ! msg
-      case msg: Joined ⇒
-        log.debug(s"received $msg")
-        systemListener ! msg
       case msg: Participants ⇒
         log.debug(s"received $msg")
         msg.replyTo ! msg
+      case msg: SerializableMessage ⇒
+        log.debug(s"received $msg")
+        systemListener ! msg
     }
   }
 

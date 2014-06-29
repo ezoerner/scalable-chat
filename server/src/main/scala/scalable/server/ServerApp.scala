@@ -17,7 +17,7 @@
 package scalable.server
 
 import akka.actor._
-import scalable.infrastructure.api.{AskLogin, AskParticipants, Join}
+import scalable.infrastructure.api.{Chat, AskLogin, AskParticipants, Join}
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{NewConnection, TcpService}
 
@@ -71,6 +71,9 @@ class ServerApp extends Actor with ActorLogging {
     case msg: AskParticipants ⇒
       assert(msg.roomName == "Lobby")
       lobbyChatRoom ! ServerAskParticipants(msg.roomName, msg.replyTo, sender())
+    case msg: Chat ⇒
+      assert(msg.roomName == "Lobby")
+      lobbyChatRoom ! msg
     case msg ⇒ log.error(s"Received unexpected message: $msg")
   }
 }

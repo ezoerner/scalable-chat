@@ -16,7 +16,12 @@
 
 package scalable.server.chat
 
+import java.util.UUID
+
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import com.datastax.driver.core.utils.UUIDs
+
+import scala.collection.SortedMap
 import scalable.infrastructure.api._
 import scalable.server.{ServerAskParticipants, ServerJoin}
 
@@ -31,13 +36,14 @@ object ChatRoom {
 
 class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
   var participants = Map[String, ActorRef]()
+  val messageHistory = SortedMap[UUID,ChatHistory]()
 
   def broadcast(msg: SerializableMessage): Unit =
     participants.values.foreach(_ ! msg)
 
   override def receive = {
-    case ServerJoin(username, _roomName, connector) ⇒
-      assert(_roomName == roomName)
+    case ServerJoin(username, rmName, connector) ⇒
+      assert(rmName == roomName)
       val newParticipants = participants + (username → connector)
       val notAlreadyPresent = newParticipants.size > participants.size
       participants = newParticipants
@@ -47,5 +53,15 @@ class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
     case ServerAskParticipants(_roomName, replyTo, connector) ⇒
       assert(_roomName == roomName)
       connector ! Participants(roomName, participants.keySet.toList.sorted, replyTo)
+
+    case msg @ Chat(id, sender, rmName, htmlText) ⇒
+      assert(id.isEmpty)
+      assert(rmName == roomName)
+      val messageId = UUIDs.timeBased
+      messageHistory + (messageId → ChatHistory(sender, htmlText))
+      broadcast(msg.copy(id = Some(messageId)))
   }
+
+  case class ChatHistory(sender: String, htmlText: String)
 }
+

@@ -16,14 +16,17 @@
 
 package scalable.infrastructure
 
+import java.util.UUID
+
 import akka.actor.ActorRef
 import akka.event.Logging
 import akka.serialization.SerializationExtension
+import reactivemongo.bson.buffer.ArrayBSONBuffer
 import scalable.GlobalEnv._
 import reactivemongo.bson._
 
 /**
- * Implicit BSON readers and writers for ActorRefs.
+ * Implicit BSON readers and writers for various data types.
  * Uses the global ActorSystem, so will not function if the global actor system
  * has not been initialized or has been shutdown.
  * @see GlobalEnv
@@ -64,5 +67,22 @@ package object api {
   }
 
   implicit object ActorRefWriter extends SerializableWriter[ActorRef]
+
+  implicit object UuidReader extends BSONReader[BSONBinary, UUID] {
+    override def read(bson: BSONBinary): UUID = {
+      val mostSigBits = bson.value.readLong()
+      val leastSigBits = bson.value.readLong()
+      assert(bson.value.readable() == 0)
+      new UUID(mostSigBits, leastSigBits)
+    }
+  }
+
+  implicit object UuidWriter extends BSONWriter[UUID, BSONBinary] {
+    override def write(uuid: UUID): BSONBinary = {
+      val writableBuffer = new ArrayBSONBuffer()
+      writableBuffer.writeLong(uuid.getMostSignificantBits).writeLong(uuid.getLeastSignificantBits)
+      BSONBinary(writableBuffer.toReadableBuffer(), Subtype.GenericBinarySubtype)
+    }
+  }
 
 }

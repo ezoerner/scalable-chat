@@ -17,10 +17,11 @@
 package scalable
 
 import java.io.IOException
+import java.util.{Calendar, TimeZone, UUID}
 
 import akka.actor.{ActorRefFactory, ActorSelection}
-import scalable.client.tcp.TcpClient
 
+import scalable.client.tcp.TcpClient
 import scalafx.Includes.jfxParent2sfx
 import scalafx.scene.Parent
 import scalafxml.core.{ControllerDependencyResolver, FXMLView}
@@ -45,5 +46,22 @@ package object client {
   def tcpClientSelection(system: ActorRefFactory): ActorSelection = system.actorSelection(s"/user/${ClientApp.path}/${TcpClient.path}")
   def appSupervisorSelection(system: ActorRefFactory): ActorSelection = system.actorSelection(s"/user/${ClientApp.path}")
 
+  // some utilities for working with time-based UUIDs
+  private lazy val startEpoch = {
+    val c: Calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT-0"))
+    c.set(Calendar.YEAR, 1582)
+    c.set(Calendar.MONTH, Calendar.OCTOBER)
+    c.set(Calendar.DAY_OF_MONTH, 15)
+    c.set(Calendar.HOUR_OF_DAY, 0)
+    c.set(Calendar.MINUTE, 0)
+    c.set(Calendar.SECOND, 0)
+    c.set(Calendar.MILLISECOND, 0)
+    c.getTimeInMillis
+  }
 
+  def unixTimestamp(uuid: UUID): Long = {
+    require(uuid.version == 1)
+    val timestamp: Long = uuid.timestamp
+    (timestamp / 10000) + startEpoch
+  }
 }
