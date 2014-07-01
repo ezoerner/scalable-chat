@@ -19,8 +19,8 @@
 * Requires Java 8
 * To run the server:  `./activator server/run`
 * To run a ScalaFX client:  `./activator client/run`
-* Configuration is in application.conf
-* Dependencies: akka , cassandra, scalafx/scalafxml, reactive-mongo-bson
+* Configuration files are in `server/src/main/resources/application.conf` and `client/src/main/resources/application.conf` for server and client respectively.
+* Dependencies: akka , cassandra, scalafx, scalafxml, reactive-mongo-bson
 * Database Configuration: TBD
 * How to run tests: `./activator test`
 * Deployment instructions: TBD
