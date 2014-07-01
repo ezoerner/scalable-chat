@@ -27,4 +27,4 @@
 
 ### Who do I talk to? ###
 
-* Repo owner and admin: [ezoerner](https://bitbucket.org/ezoerner)
+* Project Owner: [ezoerner](https://bitbucket.org/ezoerner)
