@@ -56,7 +56,8 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private val browser = new Browser("")
   private val htmlBuilder = new StringBuilder(browser.getHtml(""))
   private var insertionIndex = browser.getHtml("").indexOf("</div>")
-  private val format = DateFormat.getDateTimeInstance
+  private val dateFormat = DateFormat.getDateInstance
+  private val timeFormat = DateFormat.getTimeInstance
   private val chatRoom = new ChatRoomModel(RoomName, actorSystem)
 
   onlineListView.items = chatRoom.online
@@ -65,7 +66,6 @@ class LobbyController(private val onlineTitledPane: TitledPane,
 
   assert(onlineTitledPane != null)
   accordion.expandedPane = onlineTitledPane
-
 
   webViewParent.children.add(browser)
   webViewParent.width.addListener(new ChangeListener[Any] {
@@ -102,28 +102,40 @@ class LobbyController(private val onlineTitledPane: TitledPane,
 
   def sendChat(event: ActionEvent) = {
 
-    def extractNewContent(htmlString: String) = {
-      val beginBody = htmlString.indexOf("<body")
-      val begin = htmlString.indexOf('>', beginBody) + 1
-      val end = htmlString.lastIndexOf("</body>")
-      htmlString.substring(begin, end)
-    }
+      def extractNewContent(htmlString: String) = {
+        val beginBody = htmlString.indexOf("<body")
+        val begin = htmlString.indexOf('>', beginBody) + 1
+        val end = htmlString.lastIndexOf("</body>")
+        htmlString.substring(begin, end)
+      }
 
     val html = extractNewContent(chatEditor.htmlText)
     log.debug(s"HTML: $html")
     chatRoom.sendChat(username, html)
   }
 
-  def appendToChatGrid(timestamp: Long, sender: String, htmlText: String) = {
-      def header = {
-        val (r,g,b) = if (sender == username) (204, 255, 255) else (253, 246, 227)
-        s"""<p><font size="2" face="Courier" style="background-color: rgb($r, $g, $b);" color="#1a3399">
-           |$sender | ${format.format(new Date(timestamp))}</font></p>""".stripMargin
-      }
+  private val headerFontStyle = s"""size="2" face="Courier" color="#1a3399""""
+  private val headerFontStart = s"""<font $headerFontStyle>"""
+  private val fontEnd = "</font>"
+  private val headerStyle = """style="border-right:1px solid black;padding-right:5px;""""
+  private val contentStyle = """style="padding-left:5px;""""
+  private val HrStyle = "height: 12px;border: 0;box-shadow: inset 0 12px 12px -12px rgba(0,0,0,0.5);"
 
-      def integrateNewContent(content: String): String = {
+  def appendToChatGrid(timestamp: Long, sender: String, htmlText: String) = {
+    lazy val (r, g, b) = if (sender == username) (204, 255, 255) else (253, 246, 227)
+    lazy val timeView = s"$headerFontStart${timeFormat.format(new Date(timestamp))}$fontEnd"
+    lazy val dateView = s"$headerFontStart${dateFormat.format(new Date(timestamp))}$fontEnd"
+    lazy val senderView = headerFontStart + sender + fontEnd
+
+
+    def integrateNewContent(content: String): String = {
         // TODO: insert in correct order based on timestamp
-        val divString = "<div>" + header + content + s"""<hr style="$HrStyle"/></div>"""
+        val divString = s"""<div><table>
+                            |<colgroup><col style="background-color:rgb($r, $g, $b)"></colgroup>
+                            |<tr><td $headerStyle>$senderView</td><td rowspan="3" $contentStyle>$content</td></tr>
+                            |<tr><td $headerStyle>$dateView</td></tr>
+                            |<tr><td $headerStyle>$timeView</td></tr>
+                            |</table><hr style="$HrStyle"/></div>""".stripMargin
         htmlBuilder.insert(insertionIndex, divString)
         insertionIndex = insertionIndex + divString.length
         htmlBuilder.mkString
@@ -134,5 +146,4 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     browser.setContent(newHtmlText)
   }
 
-  private val HrStyle = "height: 12px;border: 0;box-shadow: inset 0 12px 12px -12px rgba(0,0,0,0.5);"
 }
