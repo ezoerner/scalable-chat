@@ -54,8 +54,8 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private val log = Logging(actorSystem, this.getClass)
   private val RoomName = "Lobby"
   private val browser = new Browser("")
-  private val htmlBuilder = new StringBuilder(browser.getHtml(""))
-  private var insertionIndex = browser.getHtml("").indexOf("</div>")
+  private val htmlBuilder = new StringBuilder(Browser.getHtml(""))
+  private var insertionIndex = Browser.getHtml("").indexOf("</div>")
   private val dateFormat = DateFormat.getDateInstance
   private val timeFormat = DateFormat.getTimeInstance
   private val chatRoom = new ChatRoomModel(RoomName, actorSystem)
@@ -110,14 +110,14 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       }
 
     val html = extractNewContent(chatEditor.htmlText)
-    log.debug(s"HTML: $html")
+    log.debug(s"Send: $html")
     chatRoom.sendChat(username, html)
   }
 
-  private val headerFontStyle = s"""size="2" face="Courier" color="#1a3399""""
+  private val headerFontStyle = s"""size="1" face="Courier" color="#1a3399""""
   private val headerFontStart = s"""<font $headerFontStyle>"""
   private val fontEnd = "</font>"
-  private val headerStyle = """style="border-right:1px solid black;padding-right:5px;""""
+  private val headerStyle = """style="border-right:1px solid black;padding-right:5px;vertical-align:text-top;""""
   private val contentStyle = """style="padding-left:5px;""""
   private val HrStyle = "height: 12px;border: 0;box-shadow: inset 0 12px 12px -12px rgba(0,0,0,0.5);"
 
@@ -131,7 +131,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     def integrateNewContent(content: String): String = {
         // TODO: insert in correct order based on timestamp
         val divString = s"""<div><table>
-                            |<colgroup><col style="background-color:rgb($r, $g, $b)"></colgroup>
+                            |<colgroup><col style="background-color:rgb($r, $g, $b);"></colgroup>
                             |<tr><td $headerStyle>$senderView</td><td rowspan="3" $contentStyle>$content</td></tr>
                             |<tr><td $headerStyle>$dateView</td></tr>
                             |<tr><td $headerStyle>$timeView</td></tr>
