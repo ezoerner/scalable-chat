@@ -17,18 +17,21 @@
 package scalable.client
 
 import java.net.InetSocketAddress
+import javafx.scene.Parent
+import javafx.{scene => jfxs}
 
 import akka.actor._
 import akka.io.Tcp.Connected
+
+import scala.reflect.runtime.universe.typeOf
 import scalable.client.chat.ChatHandler
 import scalable.client.tcp.TcpClient
 import scalable.infrastructure.api.{Chat, Join, Joined}
-
-import scala.reflect.runtime.universe.typeOf
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.Platform
 import scalafx.scene.Scene
-import scalafxml.core.DependenciesByType
+import scalafxml.core.{DependenciesByType, FXMLLoader}
+import scalafx.Includes._
 
 /**
  * Root actor, used for tracking the user's client session information.
@@ -47,16 +50,22 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
   val tcpClient = context.actorOf(tcpProps, TcpClient.path)
 
   def openLobby(username: String): Unit = Platform.runLater {
-    val root = loadFxmlFile("Lobby.fxml", new DependenciesByType(Map(typeOf[String] → username,
-                                                                     typeOf[ActorSystem] → context.system,
-                                                                     typeOf[ChatHandler] → this,
-                                                                     typeOf[String] → username)))
-    new PrimaryStage() {
+    val loader: FXMLLoader = new FXMLLoader(getClass.getResource("Lobby.fxml"),
+                                new DependenciesByType(Map(typeOf[String] → username,
+                                                           typeOf[ActorSystem] → context.system,
+                                                           typeOf[ChatHandler] → this,
+                                                           typeOf[String] → username)))
+    loader.load()
+    val root: Parent = loader.getRoot[jfxs.Parent]
+    val controller = loader.getController[ChatController]
+
+    val stage: PrimaryStage = new PrimaryStage() {
       title = "Lobby"
       scene = new Scene(root)
-    }.show()
-    ()
-  }
+    }
+    stage.show()
+    controller.setStageAndSetupListeners(stage)
+ }
 
   override def join(username: String, roomName: String) =
     tcpClient ! Join(username, roomName)

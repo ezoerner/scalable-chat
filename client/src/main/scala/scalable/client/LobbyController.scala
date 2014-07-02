@@ -19,6 +19,8 @@ package scalable.client
 import java.text.DateFormat
 import java.util.{Date, UUID}
 import javafx.beans.value.{ChangeListener, ObservableValue}
+import javafx.event.EventHandler
+import javafx.stage.WindowEvent
 
 import akka.actor.ActorSystem
 import akka.event.Logging
@@ -31,6 +33,7 @@ import scalafx.scene.control._
 import scalafx.scene.layout._
 import scalafx.scene.text.Text
 import scalafx.scene.web._
+import scalafx.stage.Stage
 import scalafxml.core.macros.sfxml
 
 /**
@@ -50,7 +53,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
                       private val sendChat: Button,
                       private val webViewParent: AnchorPane,
                       private val chatScrollPane: ScrollPane)
-    extends ChatListener {
+    extends ChatListener with ChatController {
   private val log = Logging(actorSystem, this.getClass)
   private val RoomName = "Lobby"
   private val browser = new Browser("")
@@ -60,29 +63,32 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private val timeFormat = DateFormat.getTimeInstance
   private val chatRoom = new ChatRoomModel(RoomName, actorSystem)
 
-  onlineListView.items = chatRoom.online
+  override def setStageAndSetupListeners(stage: Stage): Unit = {
+    onlineListView.items = chatRoom.online
+    usernameText.text = username
+    assert(onlineTitledPane != null)
+    accordion.expandedPane = onlineTitledPane
+    webViewParent.children.add(browser)
+    webViewParent.width.addListener(new ChangeListener[Any] {
+      override def changed(observable: ObservableValue[_], oldValue: Any, newValue: Any): Unit = {
+        browser.setPrefWidth(newValue.asInstanceOf[Double])
+      }
+    })
 
-  usernameText.text = username
+    browser.heightProperty().addListener(new ChangeListener[Any] {
+      override def changed(observable: ObservableValue[_], oldValue: Any, newValue: Any): Unit = {
+        chatScrollPane.vvalue = newValue.asInstanceOf[Double]
+      }
+    })
 
-  assert(onlineTitledPane != null)
-  accordion.expandedPane = onlineTitledPane
-
-  webViewParent.children.add(browser)
-  webViewParent.width.addListener(new ChangeListener[Any] {
-    override def changed(observable: ObservableValue[_], oldValue: Any, newValue: Any): Unit = {
-      browser.setPrefWidth(newValue.asInstanceOf[Double])
+    Platform.runLater {
+      chatHandler.addChatListener(this, RoomName)
+      chatHandler.join(username, RoomName)
     }
-  })
 
-  browser.heightProperty().addListener(new ChangeListener[Any] {
-    override def changed(observable: ObservableValue[_], oldValue: Any, newValue: Any): Unit = {
-      chatScrollPane.vvalue = newValue.asInstanceOf[Double]
-    }
-  })
-
-  Platform.runLater {
-    chatHandler.addChatListener(this, RoomName)
-    chatHandler.join(username, RoomName)
+    stage.setOnCloseRequest(new EventHandler[WindowEvent]() {
+      override def handle(event: WindowEvent): Unit = log.info("Closing Window")
+    })
   }
 
   override def joined(username: String): Unit = {

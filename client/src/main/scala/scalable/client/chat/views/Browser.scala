@@ -89,8 +89,8 @@ class Browser(content: String) extends Region {
 
   private def adjustHeight(): Unit = {
     Platform.runLater {
-        val result: Any = webEngine.executeScript("var e = document.getElementById('" + ContentId +
-                                                    "'); e ? e.offsetHeight : null")
+        val result: Any = webEngine.executeScript("var e = document.getElementById('" + ContentId + "');" +
+                                                    "e ? e.offsetHeight : null")
         result match {
           case i: Integer =>
             var height = i.toDouble
