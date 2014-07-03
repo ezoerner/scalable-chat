@@ -29,7 +29,8 @@ import scalable.GlobalEnv
 
 object MessageType extends Enumeration {
   type MessageType = Value
-  val AskLoginType, LoginResultType, JoinType, JoinedType, AskParticipantsType, ParticipantsType, ChatType = Value
+  val AskLoginType, LoginResultType, JoinType, JoinedType, LeaveChatType = Value
+  val AskParticipantsType, ParticipantsType, ChatType = Value
 }
 import scalable.infrastructure.api.MessageType._
 
@@ -61,7 +62,7 @@ object SerializableMessage {
     def read(doc: BSONDocument): SerializableMessage = {
       val messageType = MessageType(doc.getAs[Int]("type").get)
       deserializers.get(messageType).map(des ⇒ des(doc))
-        .getOrElse(sys.error(s"Unable to find deserializer for $messageType"))
+        .getOrElse(sys.error(s"Unable to find deserializer for $messageType; Add type to preload list"))
     }
   }
 
@@ -73,7 +74,7 @@ object SerializableMessage {
   // because objects are instantiated lazily, unfortunately we need to make sure all
   // the message deserializers are eagerly created so they can register themselves
   // before an incoming message is received
-  val _ = List(AskLogin, AskParticipants, Join, Joined, LoginResult, Participants, Chat)
+  val preloadList = List(AskLogin, AskParticipants, Join, Joined, LeaveChat, LoginResult, Participants, Chat)
 }
 
 import SerializableMessage.MessageDeserializer
@@ -172,6 +173,24 @@ object Joined extends MessageFactory {
   )
 }
 
+case class LeaveChat(username: String, roomName: String)
+extends SerializableMessage {
+  import LeaveChat._
+  override def toBsonDocument: BSONDocument = BSONDocument(
+    "type" → typeCode.id,
+    "username" → username,
+    "roomName" → roomName
+  )
+}
+
+object LeaveChat extends MessageFactory {
+  override lazy val typeCode = LeaveChatType
+  override def apply(doc: BSONDocument): LeaveChat = LeaveChat(
+    doc.getAs[String]("username").get,
+    doc.getAs[String]("roomName").get
+  )
+}
+
 case class AskParticipants(roomName: String, replyTo: ActorRef)
 extends SerializableMessage {
   import AskParticipants._
@@ -210,7 +229,7 @@ object Participants extends MessageFactory {
   )
 }
 
-// The id is a server-generated time-based UUID
+// The id is a server-generated time-based UUID, filled in by the server
 case class Chat(id: Option[UUID], sender: String, roomName: String, htmlText: String)
   extends SerializableMessage {
   import Chat._

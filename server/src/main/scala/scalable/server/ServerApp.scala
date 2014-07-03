@@ -17,7 +17,7 @@
 package scalable.server
 
 import akka.actor._
-import scalable.infrastructure.api.{Chat, AskLogin, AskParticipants, Join}
+import scalable.infrastructure.api._
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{NewConnection, TcpService}
 
@@ -68,6 +68,9 @@ class ServerApp extends Actor with ActorLogging {
     case msg: Join ⇒
       assert(msg.roomName == "Lobby") // "Lobby" is currently the only top-level chat room
       lobbyChatRoom ! ServerJoin(msg.username, msg.roomName, sender())
+    case msg: LeaveChat ⇒
+      assert(msg.roomName == "Lobby")
+      lobbyChatRoom ! msg
     case msg: AskParticipants ⇒
       assert(msg.roomName == "Lobby")
       lobbyChatRoom ! ServerAskParticipants(msg.roomName, msg.replyTo, sender())

@@ -25,8 +25,11 @@ import javafx.stage.WindowEvent
 import akka.actor.ActorSystem
 import akka.event.Logging
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 import scalable.client.chat.views.Browser
-import scalable.client.chat.{ChatHandler, ChatListener, ChatRoomModel}
+import scalable.client.chat.{ChatHandler, ChatListener}
+import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent
 import scalafx.scene.control._
@@ -61,10 +64,16 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private var insertionIndex = Browser.getHtml("").indexOf("</div>")
   private val dateFormat = DateFormat.getDateInstance
   private val timeFormat = DateFormat.getTimeInstance
-  private val chatRoom = new ChatRoomModel(RoomName, actorSystem)
 
   override def setStageAndSetupListeners(stage: Stage): Unit = {
-    onlineListView.items = chatRoom.online
+    chatHandler.getInitialParticipants(RoomName).onComplete {
+      case Success(participants) => Platform.runLater {
+        log.info(s"initial participants=$participants")
+        onlineListView.items.get() ++= participants
+       ()
+      }
+      case Failure(t) => log.error(t, "Error while trying to get participants")
+    }
     usernameText.text = username
     assert(onlineTitledPane != null)
     accordion.expandedPane = onlineTitledPane
@@ -87,16 +96,24 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     }
 
     stage.setOnCloseRequest(new EventHandler[WindowEvent]() {
-      override def handle(event: WindowEvent): Unit = log.info("Closing Window")
+      override def handle(event: WindowEvent): Unit = chatHandler.leave(RoomName, username)
     })
   }
 
   override def joined(username: String): Unit = {
     log.debug(s"$username joined Lobby")
     Platform.runLater {
-      if (chatRoom.online.add(username)) {
-        chatRoom.online.sort()
+      if (onlineListView.items.get().add(username)) {
+        onlineListView.items.get().sort()
       }
+    }
+  }
+
+  override def left(username: String): Unit = {
+    log.debug(s"$username left Lobby")
+    Platform.runLater {
+      onlineListView.items.get -= username
+      ()
     }
   }
 
@@ -117,7 +134,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
 
     val html = extractNewContent(chatEditor.htmlText)
     log.debug(s"Send: $html")
-    chatRoom.sendChat(username, html)
+    chatHandler.sendChat(RoomName, username, html)
   }
 
   private val headerFontStyle = s"""size="1" face="Courier" color="#1a3399""""

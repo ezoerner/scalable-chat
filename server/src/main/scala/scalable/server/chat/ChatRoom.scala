@@ -47,13 +47,18 @@ class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
       val newParticipants = participants + (username → connector)
       val notAlreadyPresent = newParticipants.size > participants.size
       participants = newParticipants
-      if (notAlreadyPresent) {
+      if (notAlreadyPresent)
         broadcast(Joined(username, roomName))
-      }
-    case ServerAskParticipants(_roomName, replyTo, connector) ⇒
-      assert(_roomName == roomName)
+    case ServerAskParticipants(rmName, replyTo, connector) ⇒
+      assert(rmName == roomName)
       connector ! Participants(roomName, participants.keySet.toList.sorted, replyTo)
-
+    case msg @ LeaveChat(username, room) ⇒
+      assert(room == roomName, room)
+      val newParticipants = participants - username
+      val notAlreadyAbsent = newParticipants.size < participants.size
+      participants = newParticipants
+      if (notAlreadyAbsent)
+        broadcast(msg)
     case msg @ Chat(id, sender, rmName, htmlText) ⇒
       assert(id.isEmpty)
       assert(rmName == roomName)

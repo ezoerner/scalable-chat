@@ -26,7 +26,7 @@ import akka.io.Tcp.Connected
 import scala.reflect.runtime.universe.typeOf
 import scalable.client.chat.ChatHandler
 import scalable.client.tcp.TcpClient
-import scalable.infrastructure.api.{Chat, Join, Joined}
+import scalable.infrastructure.api.{LeaveChat, Chat, Join, Joined}
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.Platform
 import scalafx.scene.Scene
@@ -57,7 +57,7 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
                                                            typeOf[String] → username)))
     loader.load()
     val root: Parent = loader.getRoot[jfxs.Parent]
-    val controller = loader.getController[ChatController]
+    val controller = loader.getController[ChatController]()
 
     val stage: PrimaryStage = new PrimaryStage() {
       title = "Lobby"
@@ -67,13 +67,11 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
     controller.setStageAndSetupListeners(stage)
  }
 
-  override def join(username: String, roomName: String) =
-    tcpClient ! Join(username, roomName)
-
   override def receive = {
     case msg: Connected ⇒ log.info(msg.toString)
     case OpenLobby(username) ⇒ openLobby(username)
     case Joined(username, roomName) ⇒ handleJoined(username, roomName)
+    case LeaveChat(username, roomName) ⇒ handleLeft(username, roomName)
     case Chat(id, username, roomName, htmlText) ⇒ handleChat(id.get, username, roomName, htmlText)
     case msg ⇒ log.info(s"Supervisor received: $msg")
   }
