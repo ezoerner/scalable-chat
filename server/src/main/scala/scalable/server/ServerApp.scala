@@ -19,7 +19,7 @@ package scalable.server
 import akka.actor._
 import scalable.infrastructure.api._
 import scalable.server.chat.ChatRoom
-import scalable.server.tcp.{NewConnection, TcpService}
+import scalable.server.tcp.{ClientDisconnected, NewConnection, TcpService}
 
 import scala.util.Try
 
@@ -77,6 +77,12 @@ class ServerApp extends Actor with ActorLogging {
     case msg: Chat ⇒
       assert(msg.roomName == "Lobby")
       lobbyChatRoom ! msg
+    case msg @ ClientDisconnected(username) ⇒
+      // for now, just let the lobby know that the user has disconnected,
+      // TODO: have the user session track which chatrooms the user is in and
+      // send the disconnected message to the user session, then the user
+      // session can send leave messages to all the chat rooms the user is in
+      lobbyChatRoom ! LeaveChat(username, "Lobby") // HACK
     case msg ⇒ log.error(s"Received unexpected message: $msg")
   }
 }
