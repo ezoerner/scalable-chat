@@ -21,6 +21,7 @@
 * To run a ScalaFX client:  `./activator client/run`
     * Note that there currently is no separate registration step. If this is the first time logging in for a user, just type in a new password at the login prompt.
 * Configuration files are in `server/src/main/resources/application.conf` and `client/src/main/resources/application.conf` for server and client respectively.
+  This is where the port can be changed for the server socket.
 * Dependencies: akka , cassandra, scalafx, scalafxml, reactive-mongo-bson
 * Database Configuration: TBD
 * How to run tests: `./activator test`
