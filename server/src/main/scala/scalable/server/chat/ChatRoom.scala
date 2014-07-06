@@ -16,15 +16,12 @@
 
 package scalable.server.chat
 
-import java.util.UUID
-
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.datastax.driver.core.utils.UUIDs
 
-import scala.collection.SortedMap
+import scala.collection.mutable
 import scalable.infrastructure.api._
 import scalable.server.{ServerAskParticipants, ServerJoin}
-
 /**
  * Chat room actor.
  *
@@ -36,37 +33,47 @@ object ChatRoom {
 
 class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
   var participants = Map[String, ActorRef]()
-  val messageHistory = SortedMap[UUID,ChatHistory]()
+
+  // for now history is only chat messages, may need to expand that later;
+  // ordering by timestamp alone is good enough, if there are multiple messages with the same
+  // timestamp then the ordering between them is non-deterministic
+  val messageHistory = mutable.SortedSet[Chat]()(Ordering.by {_.id.get.timestamp})
 
   def broadcast(msg: SerializableMessage): Unit =
     participants.values.foreach(_ ! msg)
 
   override def receive = {
+
     case ServerJoin(username, rmName, connector) ⇒
       assert(rmName == roomName)
       val newParticipants = participants + (username → connector)
       val notAlreadyPresent = newParticipants.size > participants.size
       participants = newParticipants
-      if (notAlreadyPresent)
+      if (notAlreadyPresent) {
         broadcast(Joined(username, roomName))
+        connector ! History(roomName, messageHistory.toList)
+      }
+
     case ServerAskParticipants(rmName, replyTo, connector) ⇒
       assert(rmName == roomName)
       connector ! Participants(roomName, participants.keySet.toList.sorted, replyTo)
+
     case msg @ LeaveChat(username, room) ⇒
       assert(room == roomName, room)
       val newParticipants = participants - username
       val notAlreadyAbsent = newParticipants.size < participants.size
       participants = newParticipants
-      if (notAlreadyAbsent)
+      if (notAlreadyAbsent) {
         broadcast(msg)
+      }
+
     case msg @ Chat(id, sender, rmName, htmlText) ⇒
       assert(id.isEmpty)
       assert(rmName == roomName)
       val messageId = UUIDs.timeBased
-      messageHistory + (messageId → ChatHistory(sender, htmlText))
-      broadcast(msg.copy(id = Some(messageId)))
+      val chatWithId = msg.copy(id = Some(messageId))
+      messageHistory += chatWithId
+      broadcast(chatWithId)
   }
-
-  case class ChatHistory(sender: String, htmlText: String)
 }
 

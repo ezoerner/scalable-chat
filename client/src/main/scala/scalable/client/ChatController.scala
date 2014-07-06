@@ -24,5 +24,7 @@ import scalafx.stage.Stage
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 trait ChatController {
-  def setStageAndSetupListeners(stage: Stage)
+
+
+  def setStageAndSetupListeners(stage: Stage): Unit
 }

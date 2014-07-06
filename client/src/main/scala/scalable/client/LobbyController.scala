@@ -25,10 +25,12 @@ import javafx.stage.WindowEvent
 import akka.actor.ActorSystem
 import akka.event.Logging
 
+import scala.collection.SortedMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 import scalable.client.chat.views.Browser
 import scalable.client.chat.{ChatHandler, ChatListener}
+import scalable.infrastructure.api.Chat
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent
@@ -61,7 +63,8 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private val RoomName = "Lobby"
   private val browser = new Browser("")
   private val htmlBuilder = new StringBuilder(Browser.getHtml(""))
-  private var insertionIndex = Browser.getHtml("").indexOf("</div>")
+  private var insertionIndexes = SortedMap[Long, Int]()
+  private var bottomInsertionIndex = Browser.getHtml("").indexOf("</div>")
   private val dateFormat = DateFormat.getDateInstance
   private val timeFormat = DateFormat.getTimeInstance
 
@@ -118,9 +121,19 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   }
 
   override def receiveChat(id: UUID, sender: String, htmlText: String): Unit = {
-    // TODO: consider using eaio.uuid library to insert message in sorted order
-    // TODO: based directly on the time-based UUID
-    appendToChatGrid(unixTimestamp(id), sender, htmlText)
+    updateHtmlBuilderWithNewContent(unixTimestamp(id), sender, htmlText)
+    updateBrowser()
+  }
+
+  override def receiveHistory(history: List[Chat]): Unit = {
+    history.foreach { case Chat(id, sender, _, htmlText) ⇒
+      updateHtmlBuilderWithNewContent(unixTimestamp(id.get), sender, htmlText)
+    }
+    updateBrowser()
+  }
+
+  private def updateBrowser() = {
+    browser.setContent(htmlBuilder.mkString)
   }
 
   def sendChat(event: ActionEvent) = {
@@ -144,29 +157,42 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private val contentStyle = """style="padding-left:5px;""""
   private val HrStyle = "height: 12px;border: 0;box-shadow: inset 0 12px 12px -12px rgba(0,0,0,0.5);"
 
-  def appendToChatGrid(timestamp: Long, sender: String, htmlText: String) = {
+  def updateHtmlBuilderWithNewContent(timestamp: Long, sender: String, htmlText: String): Unit = {
     lazy val (r, g, b) = if (sender == username) (204, 255, 255) else (253, 246, 227)
     lazy val timeView = s"$headerFontStart${timeFormat.format(new Date(timestamp))}$fontEnd"
     lazy val dateView = s"$headerFontStart${dateFormat.format(new Date(timestamp))}$fontEnd"
     lazy val senderView = headerFontStart + sender + fontEnd
 
+    def insertionIndex(stringToInsert: String): Int = {
+      val indexDisplacement = stringToInsert.length
+      if (insertionIndexes.lastOption.fold(true){ case (t,i) ⇒ timestamp >= t}) {
+        val index = bottomInsertionIndex
+        bottomInsertionIndex = index + indexDisplacement
+        insertionIndexes = insertionIndexes + (timestamp → index)
+        index
+      } else {
+        val pivotIndex = (insertionIndexes to timestamp).size
+        val (beforeMap, afterMap) = insertionIndexes.splitAt(pivotIndex)
+        assert(!afterMap.isEmpty)
+        val insertionIndexIntoWeb = afterMap(0)
+        val updatedAfterMap = afterMap.map{case (k,v) ⇒ k → (v + indexDisplacement)}
+        insertionIndexes = (beforeMap + (timestamp → insertionIndexIntoWeb)) ++ updatedAfterMap
+        insertionIndexIntoWeb
+      }
+    }
 
-    def integrateNewContent(content: String): String = {
-        // TODO: insert in correct order based on timestamp
+    def integrateNewContent(): Unit = {
         val divString = s"""<div><table>
                             |<colgroup><col style="background-color:rgb($r, $g, $b);"></colgroup>
-                            |<tr><td $headerStyle>$senderView</td><td rowspan="3" $contentStyle>$content</td></tr>
+                            |<tr><td $headerStyle>$senderView</td><td rowspan="3" $contentStyle>$htmlText</td></tr>
                             |<tr><td $headerStyle>$dateView</td></tr>
                             |<tr><td $headerStyle>$timeView</td></tr>
                             |</table><hr style="$HrStyle"/></div>""".stripMargin
-        htmlBuilder.insert(insertionIndex, divString)
-        insertionIndex = insertionIndex + divString.length
-        htmlBuilder.mkString
+        htmlBuilder.insert(insertionIndex(divString), divString)
       }
 
-    val newHtmlText = integrateNewContent(htmlText)
+    val newHtmlText = integrateNewContent()
     log.debug(s"New HTML=$newHtmlText")
-    browser.setContent(newHtmlText)
+    newHtmlText
   }
-
 }

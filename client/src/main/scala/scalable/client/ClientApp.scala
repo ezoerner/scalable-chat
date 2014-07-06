@@ -17,16 +17,18 @@
 package scalable.client
 
 import java.net.InetSocketAddress
+import java.util.UUID
 import javafx.scene.Parent
 import javafx.{scene => jfxs}
 
 import akka.actor._
 import akka.io.Tcp.Connected
 
+import scala.collection.SortedMap
 import scala.reflect.runtime.universe.typeOf
 import scalable.client.chat.ChatHandler
 import scalable.client.tcp.TcpClient
-import scalable.infrastructure.api.{LeaveChat, Chat, Join, Joined}
+import scalable.infrastructure.api._
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.Platform
 import scalafx.scene.Scene
@@ -73,6 +75,7 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
     case Joined(username, roomName) ⇒ handleJoined(username, roomName)
     case LeaveChat(username, roomName) ⇒ handleLeft(username, roomName)
     case Chat(id, username, roomName, htmlText) ⇒ handleChat(id.get, username, roomName, htmlText)
+    case History(roomName, history) ⇒ handleHistory(roomName, history)
     case msg ⇒ log.info(s"Supervisor received: $msg")
   }
 }

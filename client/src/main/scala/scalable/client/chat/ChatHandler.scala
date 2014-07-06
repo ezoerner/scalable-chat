@@ -22,12 +22,13 @@ import akka.actor.{Actor, ActorLogging}
 import akka.pattern.ask
 import akka.util.Timeout
 
+import scala.collection.SortedMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalable.client._
 import scalable.client.tcp.ClientAskParticipants
-import scalable.infrastructure.api.{Chat, Join, LeaveChat, Participants}
+import scalable.infrastructure.api._
 
 
 
@@ -63,6 +64,10 @@ trait ChatHandler {
     listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveChat(id, username, htmlText))
   }
 
+  def handleHistory(roomName: String, history: List[Chat]) = {
+    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveHistory(history))
+  }
+
   def addChatListener(listener: ChatListener, room: String) = {
     listeners = listeners + (room → listener)
   }
@@ -81,4 +86,5 @@ trait ChatListener {
   def joined(username: String): Unit
   def left(username: String): Unit
   def receiveChat(id: UUID, sender: String, htmlText: String) : Unit
+  def receiveHistory(history: List[Chat]): Unit
 }

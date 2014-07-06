@@ -18,11 +18,13 @@ package scalable.infrastructure.api
 
 import java.util.UUID
 
-import akka.actor.{ActorSystem, ActorRef}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.event.Logging
 import akka.util.ByteString
 import reactivemongo.bson._
+import reactivemongo.bson.DefaultBSONHandlers._
 import reactivemongo.bson.buffer.{ArrayBSONBuffer, ArrayReadableBuffer, DefaultBufferHandler, WritableBuffer}
+
 import scala.collection.mutable
 import scalable.GlobalEnv
 
@@ -30,7 +32,7 @@ import scalable.GlobalEnv
 object MessageType extends Enumeration {
   type MessageType = Value
   val AskLoginType, LoginResultType, JoinType, JoinedType, LeaveChatType = Value
-  val AskParticipantsType, ParticipantsType, ChatType = Value
+  val AskParticipantsType, ParticipantsType, ChatType, HistoryType = Value
 }
 import scalable.infrastructure.api.MessageType._
 
@@ -74,10 +76,11 @@ object SerializableMessage {
   // because objects are instantiated lazily, unfortunately we need to make sure all
   // the message deserializers are eagerly created so they can register themselves
   // before an incoming message is received
-  val preloadList = List(AskLogin, AskParticipants, Join, Joined, LeaveChat, LoginResult, Participants, Chat)
+  val preloadList = List(AskLogin, AskParticipants, Join, Joined, LeaveChat,
+                         LoginResult, Participants, Chat, History)
 }
 
-import SerializableMessage.MessageDeserializer
+import scalable.infrastructure.api.SerializableMessage.MessageDeserializer
 
 sealed trait SerializableMessage {
 
@@ -98,7 +101,7 @@ sealed trait MessageFactory extends MessageDeserializer {
 
 case class AskLogin(username: String, password: String, replyTo: ActorRef)
   extends SerializableMessage {
-  import AskLogin._
+  import scalable.infrastructure.api.AskLogin._
   override def toBsonDocument: BSONDocument =
     BSONDocument(
     "type" → typeCode.id,
@@ -119,7 +122,7 @@ object AskLogin extends MessageFactory {
 
 case class LoginResult(result: ResultStatus, username: String, replyTo: ActorRef)
 extends SerializableMessage {
-  import LoginResult._
+  import scalable.infrastructure.api.LoginResult._
   override def toBsonDocument: BSONDocument = BSONDocument(
     "type" → typeCode.id,
     "result" → result.id,
@@ -139,7 +142,7 @@ object LoginResult extends MessageFactory {
 
 case class Join(username: String, roomName: String)
 extends SerializableMessage {
-  import Join._
+  import scalable.infrastructure.api.Join._
   override def toBsonDocument: BSONDocument = BSONDocument(
     "type" → typeCode.id,
     "username" → username,
@@ -157,7 +160,7 @@ object Join extends MessageFactory {
 
 case class Joined(username: String, roomName: String)
 extends SerializableMessage {
-  import Joined._
+  import scalable.infrastructure.api.Joined._
   override def toBsonDocument: BSONDocument = BSONDocument(
     "type" → typeCode.id,
     "username" → username,
@@ -175,7 +178,7 @@ object Joined extends MessageFactory {
 
 case class LeaveChat(username: String, roomName: String)
 extends SerializableMessage {
-  import LeaveChat._
+  import scalable.infrastructure.api.LeaveChat._
   override def toBsonDocument: BSONDocument = BSONDocument(
     "type" → typeCode.id,
     "username" → username,
@@ -193,7 +196,7 @@ object LeaveChat extends MessageFactory {
 
 case class AskParticipants(roomName: String, replyTo: ActorRef)
 extends SerializableMessage {
-  import AskParticipants._
+  import scalable.infrastructure.api.AskParticipants._
   override def toBsonDocument: BSONDocument = BSONDocument(
     "type" → typeCode.id,
     "roomName" → roomName,
@@ -211,7 +214,7 @@ object AskParticipants extends MessageFactory {
 
 case class Participants(roomName: String, participants: List[String], replyTo: ActorRef)
   extends SerializableMessage {
-  import Participants._
+  import scalable.infrastructure.api.Participants._
   override def toBsonDocument: BSONDocument = BSONDocument(
     "type" → typeCode.id,
     "roomName" → roomName,
@@ -232,7 +235,7 @@ object Participants extends MessageFactory {
 // The id is a server-generated time-based UUID, filled in by the server
 case class Chat(id: Option[UUID], sender: String, roomName: String, htmlText: String)
   extends SerializableMessage {
-  import Chat._
+  import scalable.infrastructure.api.Chat._
 
   override def toBsonDocument: BSONDocument = BSONDocument(
     "type" → typeCode.id,
@@ -252,5 +255,40 @@ object Chat extends MessageFactory {
     doc.getAs[String]("roomName").get,
     doc.getAs[String]("htmlText").get
   )
+
+  implicit object ChatWriter extends BSONWriter[Chat, BSONDocument] {
+    def write(message: Chat): BSONDocument =
+      message.toBsonDocument
+  }
+
+  implicit object ChatReader extends BSONReader[BSONDocument, Chat] {
+    override def read(bson: BSONDocument): Chat = Chat(bson)
+  }
+
 }
 
+case class History(roomName: String, history: List[Chat])
+  extends SerializableMessage {
+  import scalable.infrastructure.api.History._
+
+  override def toBsonDocument: BSONDocument = {
+    BSONDocument(
+      "type" → typeCode.id,
+      "roomName" → roomName,
+      "history" → BSONArray(history.map(BSON.writeDocument(_)))
+    )
+  }
+}
+
+object History extends MessageFactory {
+  override lazy val typeCode: MessageType = HistoryType
+
+  override def apply(doc: BSONDocument): History = {
+    val history: BSONValue = doc.get("history").get
+    History(
+      doc.getAs[String]("roomName").get,
+      history.asInstanceOf[BSONArray].values.toList.map{bsonValue ⇒
+        bsonValue.asInstanceOf[BSONDocument].asOpt[Chat].get}
+    )
+  }
+}
