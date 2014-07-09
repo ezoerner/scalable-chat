@@ -10,8 +10,6 @@ parallelExecution in Test := false
 
 reactiveMongoVersion in ThisBuild := "0.10.0"
 
-version in ThisBuild := "1.0.0-SNAPSHOT"
-
 lazy val infrastructure = project
 
 lazy val client = project.dependsOn(server % "test->compile",

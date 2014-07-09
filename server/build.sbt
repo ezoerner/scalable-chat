@@ -9,3 +9,5 @@ libraryDependencies ++= {
     "com.datastax.cassandra" %   "cassandra-driver-core"    % "2.0.2"
   )
 }
+
+net.virtualvoid.sbt.graph.Plugin.graphSettings
