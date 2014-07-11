@@ -25,13 +25,12 @@ import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.duration._
 import scalable.infrastructure.api._
-import scalable.server.{AkkaTestkitSpecs2Support, Configuration}
-
+import scalable.server.{ AkkaTestkitSpecs2Support, Configuration }
 
 abstract class TcpClientAndServer extends AkkaTestkitSpecs2Support {
 
   def tcpService = system.actorOf(TcpService.props(self))
-  def clientProps =  TestClient.props(new InetSocketAddress(Configuration.host, Configuration.portTcp), self)
+  def clientProps = TestClient.props(new InetSocketAddress(Configuration.host, Configuration.portTcp), self)
   def clientAndServer: (ActorRef, ActorRef) = {
     tcpService ! NotifyOnBound()
     expectMsgType[Bound]
@@ -54,7 +53,7 @@ class TcpTest extends Specification with NoTimeConversions {
     "transfer a Login message from client to server" in new TcpClientAndServer {
       within(5.second) {
         val (tcpClient, _) = clientAndServer
-        val msg = AskLogin("user","password", pickleActorRef(tcpClient))
+        val msg = AskLogin("user", "password", pickleActorRef(tcpClient))
         tcpClient ! msg.toByteString
         expectMsgType[AskLogin] must be equalTo msg
       }

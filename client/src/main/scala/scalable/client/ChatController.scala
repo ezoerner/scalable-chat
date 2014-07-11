@@ -25,6 +25,5 @@ import scalafx.stage.Stage
  */
 trait ChatController {
 
-
   def setStageAndSetupListeners(stage: Stage): Unit
 }

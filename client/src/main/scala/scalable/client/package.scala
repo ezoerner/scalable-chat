@@ -17,14 +17,14 @@
 package scalable
 
 import java.io.IOException
-import java.util.{Calendar, TimeZone, UUID}
+import java.util.{ Calendar, TimeZone, UUID }
 
-import akka.actor.{ActorRefFactory, ActorSelection}
+import akka.actor.{ ActorRefFactory, ActorSelection }
 
 import scalable.client.tcp.TcpClient
 import scalafx.Includes.jfxParent2sfx
 import scalafx.scene.Parent
-import scalafxml.core.{ControllerDependencyResolver, FXMLView}
+import scalafxml.core.{ ControllerDependencyResolver, FXMLView }
 
 /**
  * Client utilities.

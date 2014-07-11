@@ -25,7 +25,6 @@ import scala.pickling.binary._
 
 import com.datastax.driver.core.utils.UUIDs
 
-
 sealed trait ResultStatus
 case class Ok() extends ResultStatus
 case class WrongPassword() extends ResultStatus

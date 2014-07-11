@@ -18,7 +18,7 @@ package scalable.client.chat
 
 import java.util.UUID
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{ Actor, ActorLogging }
 import akka.pattern.ask
 import akka.util.Timeout
 
@@ -29,9 +29,6 @@ import scala.concurrent.duration._
 import scalable.client._
 import scalable.client.tcp.ClientAskParticipants
 import scalable.infrastructure.api._
-
-
-
 
 /**
  * Actor to handle client-side chat events for all chat rooms.
@@ -85,6 +82,6 @@ trait ChatHandler {
 trait ChatListener {
   def joined(username: String): Unit
   def left(username: String): Unit
-  def receiveChat(id: MessageId, sender: String, htmlText: String) : Unit
+  def receiveChat(id: MessageId, sender: String, htmlText: String): Unit
   def receiveHistory(history: List[Chat]): Unit
 }

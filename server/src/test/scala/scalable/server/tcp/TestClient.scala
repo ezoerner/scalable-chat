@@ -18,8 +18,8 @@ package scalable.server.tcp
 
 import java.net.InetSocketAddress
 
-import akka.actor.{Actor, ActorRef, Props}
-import akka.io.{IO, Tcp}
+import akka.actor.{ Actor, ActorRef, Props }
+import akka.io.{ IO, Tcp }
 import akka.util.ByteString
 import scalable.infrastructure.api.SerializableMessage
 
@@ -44,26 +44,26 @@ class TestClient(remote: InetSocketAddress, listener: ActorRef) extends Actor {
     case msg: Connect ⇒
       IO(Tcp) ! msg
       sender() ! msg
-    case CommandFailed(_: Connect) =>
+    case CommandFailed(_: Connect) ⇒
       listener ! "connect failed"
       context stop self
 
-    case c @ Connected(remoteAddress, local) =>
+    case c @ Connected(remoteAddress, local) ⇒
       listener ! c
       val connection = sender()
       connection ! Register(self)
       context become {
-        case data: ByteString =>
+        case data: ByteString ⇒
           connection ! Write(data)
-        case CommandFailed(w: Write) =>
+        case CommandFailed(w: Write) ⇒
           // O/S buffer was full
           listener ! "write failed"
-        case Received(data) =>
+        case Received(data) ⇒
           val message = SerializableMessage(data)
           listener ! message
-        case "close" =>
+        case "close" ⇒
           connection ! Close
-        case _: ConnectionClosed =>
+        case _: ConnectionClosed ⇒
           listener ! "connection closed"
           context stop self
       }

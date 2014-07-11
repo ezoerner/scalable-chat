@@ -20,7 +20,7 @@ import akka.actor._
 import akka.util.ByteString
 import scalable.infrastructure.api._
 import scalable.server.chat.ChatRoom
-import scalable.server.tcp.{ClientDisconnected, NewConnection, TcpService}
+import scalable.server.tcp.{ ClientDisconnected, NewConnection, TcpService }
 
 import scala.util.Try
 
@@ -37,7 +37,6 @@ class ServerApp extends Actor with ActorLogging {
   log.debug(s"Main Actor path=${self.path.toStringWithoutAddress}")
   context.actorOf(TcpService.props(self), "tcpService")
   lazy val lobbyChatRoom = context.actorOf(ChatRoom.props("Lobby"), "lobby")
-
 
   private def login(login: ServerLogin): Unit = {
     // We use dead simple authentication logic.
@@ -57,7 +56,6 @@ class ServerApp extends Actor with ActorLogging {
       case ex ⇒ throw ex
     }
   }
-
 
   override def receive = {
     case msg: AskLogin ⇒

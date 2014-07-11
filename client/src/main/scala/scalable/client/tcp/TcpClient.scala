@@ -19,7 +19,7 @@ package scalable.client.tcp
 import java.net.InetSocketAddress
 
 import akka.actor._
-import akka.io.{IO, Tcp}
+import akka.io.{ IO, Tcp }
 import akka.util.ByteString
 import scalable.infrastructure.api._
 
@@ -55,11 +55,11 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
   }
 
   def receive = {
-    case CommandFailed(_: Connect) =>
+    case CommandFailed(_: Connect) ⇒
       systemListener ! "connect failed"
       context stop self
 
-    case c @ Connected(remoteAddress, localAddress) =>
+    case c @ Connected(remoteAddress, localAddress) ⇒
       systemListener ! c
       val connection = sender()
       connection ! Register(self)
@@ -70,15 +70,15 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
         case msg: SerializableMessage ⇒
           log.debug(s"Writing $msg")
           connection ! Write(msg.toByteString)
-        case Received(data) =>
+        case Received(data) ⇒
           handleDataReceived(data)
-        case CommandFailed(w: Write) =>
+        case CommandFailed(w: Write) ⇒
           // O/S buffer was full
           systemListener ! "write failed"
-        case _: ConnectionClosed =>
+        case _: ConnectionClosed ⇒
           systemListener ! "connection closed"
           context stop self
-        case "close" =>
+        case "close" ⇒
           connection ! Close
         case msg ⇒
           log.error(s"Unexpected message received: $msg")

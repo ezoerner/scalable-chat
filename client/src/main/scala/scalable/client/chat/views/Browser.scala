@@ -17,9 +17,9 @@
 package scalable.client.chat.views
 
 import java.util
-import javafx.beans.value.{ObservableValue, ChangeListener}
+import javafx.beans.value.{ ObservableValue, ChangeListener }
 import javafx.collections.ListChangeListener
-import javafx.geometry.{VPos, HPos, Insets}
+import javafx.geometry.{ VPos, HPos, Insets }
 import javafx.scene.Node
 import javafx.scene.layout.Region
 import javafx.scene.web.WebView
@@ -65,7 +65,7 @@ class Browser(content: String) extends Region {
   webView.getChildrenUnmodifiable.addListener(new ListChangeListener[Node] {
     def onChanged(change: ListChangeListener.Change[_ <: Node]) = {
       val scrolls: util.Set[Node] = webView.lookupAll(".scroll-bar")
-      for (scroll <- scrolls.asScala) {
+      for (scroll ← scrolls.asScala) {
         scroll.setVisible(false)
       }
     }
@@ -89,15 +89,15 @@ class Browser(content: String) extends Region {
 
   private def adjustHeight(): Unit = {
     Platform.runLater {
-        val result: Any = webEngine.executeScript("var e = document.getElementById('" + ContentId + "');" +
-                                                    "e ? e.offsetHeight : null")
-        result match {
-          case i: Integer =>
-            var height = i.toDouble
-            height = height + 20
-            webView.setPrefHeight(height)
-          case _ =>
-        }
+      val result: Any = webEngine.executeScript("var e = document.getElementById('" + ContentId + "');" +
+        "e ? e.offsetHeight : null")
+      result match {
+        case i: Integer ⇒
+          var height = i.toDouble
+          height = height + 20
+          webView.setPrefHeight(height)
+        case _ ⇒
+      }
     }
   }
 }

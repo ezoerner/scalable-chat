@@ -23,8 +23,8 @@ object TcpServer {
   def props(connection: ActorRef, listener: ActorRef) = Props(new TcpServer(connection, listener))
 }
 
-class TcpServer(private val connection : ActorRef, private val listener: ActorRef)
-extends Actor with ActorLogging {
+class TcpServer(private val connection: ActorRef, private val listener: ActorRef)
+    extends Actor with ActorLogging {
   var trackedUser: Option[String] = None
   import context.system
 
@@ -33,17 +33,17 @@ extends Actor with ActorLogging {
   listener ! NewConnection(self)
 
   override def receive = {
-    case Received(byteString) =>
+    case Received(byteString) ⇒
       val message = SerializableMessage(byteString)
       log.debug(s"Received $message")
       listener ! message
-    case PeerClosed =>
+    case PeerClosed ⇒
       trackedUser.fold(())(username ⇒ listener ! ClientDisconnected(username))
       stop()
-    case ErrorClosed => stop()
-    case Closed => stop()
-    case ConfirmedClosed => stop()
-    case Aborted => stop()
+    case ErrorClosed     ⇒ stop()
+    case Closed          ⇒ stop()
+    case ConfirmedClosed ⇒ stop()
+    case Aborted         ⇒ stop()
 
     case msg @ LoginResult(resultStatus, username, _) if resultStatus == Ok ⇒
       trackedUser = Some(username)

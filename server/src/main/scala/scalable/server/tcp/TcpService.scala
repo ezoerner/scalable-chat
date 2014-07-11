@@ -18,8 +18,8 @@ package scalable.server.tcp
 
 import java.net.InetSocketAddress
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import akka.io.{IO, Tcp}
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.io.{ IO, Tcp }
 import scalable.server.Configuration
 
 object TcpService {
@@ -39,10 +39,10 @@ class TcpService(private val listener: ActorRef) extends Actor with ActorLogging
 
   override def receive = {
 
-    case b @ Bound(localAddr) =>
+    case b @ Bound(localAddr) ⇒
       log.info(s"Successfully $b")
       localAddress = Some(localAddr)
-      bindListener.fold(()){_ ! b}
+      bindListener.fold(()) { _ ! b }
 
     case NotifyOnBound() ⇒
       if (localAddress.isDefined)
@@ -50,8 +50,8 @@ class TcpService(private val listener: ActorRef) extends Actor with ActorLogging
       else
         bindListener = Some(sender())
 
-    case Tcp.CommandFailed(_: Tcp.Bind) => context stop self
-    case Tcp.Connected(remote, local) =>
+    case Tcp.CommandFailed(_: Tcp.Bind) ⇒ context stop self
+    case Tcp.Connected(remote, local) ⇒
       sender ! Tcp.Register(context.actorOf(TcpServer.props(sender(), listener)))
   }
 }

@@ -32,7 +32,7 @@ import scalafxml.core.DependenciesByType
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 
-object Main extends JFXApp  {
+object Main extends JFXApp {
   lazy val actorSystem = ActorSystem("Main")
 
   def dependencies = new DependenciesByType(Map(typeOf[ActorSystem] -> actorSystem))
@@ -46,7 +46,8 @@ object Main extends JFXApp  {
   override def main(args: Array[String]): Unit = {
     val root = try {
       actorSystem.actorOf(ClientApp.props, ClientApp.path)
-    } catch {
+    }
+    catch {
       case NonFatal(e) ⇒ actorSystem.shutdown(); throw e
     }
     actorSystem.actorOf(Terminator.props(root), Terminator.path)
@@ -66,6 +67,6 @@ object Configuration {
   config.checkValid(ConfigFactory.defaultReference)
 
   val host = config.getString("scalable.host")
-  val portTcp  = config.getInt("scalable.ports.tcp")
+  val portTcp = config.getInt("scalable.ports.tcp")
 }
 

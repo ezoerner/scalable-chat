@@ -49,7 +49,8 @@ class UserSession(login: ServerLogin) extends Actor with ActorLogging {
         tcpConnector = msg.connector
         loggedIn()
         Ok()
-      } else WrongPassword()
+      }
+      else WrongPassword()
       msg.connector ! LoginResult(resultStatus, msg.username, msg.replyTo)
   }
 

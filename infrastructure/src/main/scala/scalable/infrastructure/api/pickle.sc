@@ -1,6 +1,9 @@
+
+import akka.util.ByteString
+
 import scala.pickling._
 import binary._
-import scalable.infrastructure.api.{Joined, SerializableMessage}
+import scalable.infrastructure.api.{Participants, Joined, SerializableMessage}
 
 val lst1 = List(1, 2, 3, 4)
 val pckl = lst1.pickle
@@ -11,3 +14,6 @@ val joined: SerializableMessage = Joined("username", "roomName")
 val bytes2 = joined.toByteString
 val newJoined = SerializableMessage(bytes2)
 joined == newJoined
+
+
+val pck2 = Participants("lobby", List("eric", "ric"), ByteString("xyz")).pickle

@@ -16,7 +16,7 @@
 
 package scalable.infrastructure.api
 
-import akka.actor.{ActorSystem, Actor, Props}
+import akka.actor.{ ActorSystem, Actor, Props }
 import org.specs2.mutable.Specification
 
 /**
@@ -29,7 +29,7 @@ class SerializableMessageTest extends Specification {
   sequential
 
   class TestActor extends Actor {
-    override def receive: Receive = {case msg ⇒ println(msg)}
+    override def receive: Receive = { case msg ⇒ println(msg) }
   }
 
   "A Login message" should {
@@ -45,7 +45,8 @@ class SerializableMessageTest extends Specification {
         newLogin.asInstanceOf[AskLogin].password === login.asInstanceOf[AskLogin].password
         unpickleActorRef(newLogin.asInstanceOf[AskLogin].replyTo) ===
           unpickleActorRef(login.asInstanceOf[AskLogin].replyTo)
-      } finally {
+      }
+      finally {
         actorSystem.shutdown()
       }
     }
@@ -63,7 +64,8 @@ class SerializableMessageTest extends Specification {
         newLoginResult.asInstanceOf[LoginResult].result === loginResult.asInstanceOf[LoginResult].result
         unpickleActorRef(newLoginResult.asInstanceOf[LoginResult].replyTo) ===
           unpickleActorRef(loginResult.asInstanceOf[LoginResult].replyTo)
-      } finally {
+      }
+      finally {
         actorSystem.shutdown()
       }
     }
@@ -77,7 +79,8 @@ class SerializableMessageTest extends Specification {
         val bytes = joined.toByteString
         val newJoined = SerializableMessage(bytes)
         joined === newJoined
-      } finally {
+      }
+      finally {
         actorSystem.shutdown()
       }
     }

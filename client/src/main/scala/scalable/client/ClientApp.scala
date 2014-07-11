@@ -19,7 +19,7 @@ package scalable.client
 import java.net.InetSocketAddress
 import java.util.UUID
 import javafx.scene.Parent
-import javafx.{scene => jfxs}
+import javafx.{ scene ⇒ jfxs }
 
 import akka.actor._
 import akka.io.Tcp.Connected
@@ -32,7 +32,7 @@ import scalable.infrastructure.api._
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.Platform
 import scalafx.scene.Scene
-import scalafxml.core.{DependenciesByType, FXMLLoader}
+import scalafxml.core.{ DependenciesByType, FXMLLoader }
 import scalafx.Includes._
 
 /**
@@ -53,10 +53,10 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
 
   def openLobby(username: String): Unit = Platform.runLater {
     val loader: FXMLLoader = new FXMLLoader(getClass.getResource("Lobby.fxml"),
-                                new DependenciesByType(Map(typeOf[String] → username,
-                                                           typeOf[ActorSystem] → context.system,
-                                                           typeOf[ChatHandler] → this,
-                                                           typeOf[String] → username)))
+      new DependenciesByType(Map(typeOf[String] → username,
+        typeOf[ActorSystem] → context.system,
+        typeOf[ChatHandler] → this,
+        typeOf[String] → username)))
     loader.load()
     val root: Parent = loader.getRoot[jfxs.Parent]
     val controller = loader.getController[ChatController]()
@@ -67,16 +67,16 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
     }
     stage.show()
     controller.setStageAndSetupListeners(stage)
- }
+  }
 
   override def receive = {
-    case msg: Connected ⇒ log.info(msg.toString)
-    case OpenLobby(username) ⇒ openLobby(username)
-    case Joined(username, roomName) ⇒ handleJoined(username, roomName)
-    case LeaveChat(username, roomName) ⇒ handleLeft(username, roomName)
+    case msg: Connected                         ⇒ log.info(msg.toString)
+    case OpenLobby(username)                    ⇒ openLobby(username)
+    case Joined(username, roomName)             ⇒ handleJoined(username, roomName)
+    case LeaveChat(username, roomName)          ⇒ handleLeft(username, roomName)
     case Chat(username, roomName, htmlText, id) ⇒ handleChat(id, username, roomName, htmlText)
-    case History(roomName, history) ⇒ handleHistory(roomName, history)
-    case msg ⇒ log.info(s"Supervisor received: $msg")
+    case History(roomName, history)             ⇒ handleHistory(roomName, history)
+    case msg                                    ⇒ log.info(s"Supervisor received: $msg")
   }
 }
 

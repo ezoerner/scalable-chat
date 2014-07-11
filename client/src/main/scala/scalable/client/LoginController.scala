@@ -18,7 +18,7 @@ package scalable.client
 
 import akka.actor.ActorSystem
 import akka.event.Logging
-import akka.pattern.{AskTimeoutException, ask}
+import akka.pattern.{ AskTimeoutException, ask }
 import akka.util.Timeout
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -63,11 +63,11 @@ class LoginController(private val usernameField: TextField,
     val futureResponse =
       (tcpClient ? ClientAskLogin(usernameField.text.value, passwordField.text.value)).mapTo[LoginResult]
 
-    futureResponse.onSuccess{
+    futureResponse.onSuccess {
       case LoginResult(Ok(), username, _) if username == usernameField.text.value ⇒
         log.debug("Successful Login")
         appSupervisor ! OpenLobby(username)
-        // opening a new PrimaryStage will reuse this same window
+      // opening a new PrimaryStage will reuse this same window
       case LoginResult(status, username, _) ⇒
         Platform.runLater(failedText.visible.value = true)
         log.error(s"Unsuccessful login: $status, $username")
@@ -75,13 +75,14 @@ class LoginController(private val usernameField: TextField,
         log.error(s"Received unknown message: $msg")
     }
 
-    futureResponse.recover{case ex: AskTimeoutException ⇒
-      log.error("Unsuccessful login: Timed Out")
-      Platform.runLater(timedOutText.visible.value = true)
+    futureResponse.recover {
+      case ex: AskTimeoutException ⇒
+        log.error("Unsuccessful login: Timed Out")
+        Platform.runLater(timedOutText.visible.value = true)
     }
   }
 
-  def exit()= {
+  def exit() = {
     Platform.exit()
   }
 }

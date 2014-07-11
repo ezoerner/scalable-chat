@@ -17,8 +17,8 @@
 package scalable.client
 
 import java.text.DateFormat
-import java.util.{Date, UUID}
-import javafx.beans.value.{ChangeListener, ObservableValue}
+import java.util.{ Date, UUID }
+import javafx.beans.value.{ ChangeListener, ObservableValue }
 import javafx.event.EventHandler
 import javafx.stage.WindowEvent
 
@@ -27,9 +27,9 @@ import akka.event.Logging
 
 import scala.collection.SortedMap
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 import scalable.client.chat.views.Browser
-import scalable.client.chat.{ChatHandler, ChatListener}
+import scalable.client.chat.{ ChatHandler, ChatListener }
 import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.Platform
@@ -69,12 +69,12 @@ class LobbyController(private val onlineTitledPane: TitledPane,
 
   override def setStageAndSetupListeners(stage: Stage): Unit = {
     chatHandler.getInitialParticipants(RoomName).onComplete {
-      case Success(participants) => Platform.runLater {
+      case Success(participants) ⇒ Platform.runLater {
         log.info(s"initial participants=$participants")
         onlineListView.items.get() ++= participants
-       ()
+        ()
       }
-      case Failure(t) => log.error(t, "Error while trying to get participants")
+      case Failure(t) ⇒ log.error(t, "Error while trying to get participants")
     }
     usernameText.text = username
     assert(onlineTitledPane != null)
@@ -125,8 +125,9 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   }
 
   override def receiveHistory(history: List[Chat]): Unit = {
-    history.foreach { case Chat(sender, _, htmlText, id) ⇒
-      updateHtmlBuilderWithNewContent(id.unixTimestamp, sender, htmlText)
+    history.foreach {
+      case Chat(sender, _, htmlText, id) ⇒
+        updateHtmlBuilderWithNewContent(id.unixTimestamp, sender, htmlText)
     }
     updateBrowser()
   }
@@ -137,12 +138,12 @@ class LobbyController(private val onlineTitledPane: TitledPane,
 
   def sendChat(event: ActionEvent) = {
 
-      def extractNewContent(htmlString: String) = {
-        val beginBody = htmlString.indexOf("<body")
-        val begin = htmlString.indexOf('>', beginBody) + 1
-        val end = htmlString.lastIndexOf("</body>")
-        htmlString.substring(begin, end)
-      }
+    def extractNewContent(htmlString: String) = {
+      val beginBody = htmlString.indexOf("<body")
+      val begin = htmlString.indexOf('>', beginBody) + 1
+      val end = htmlString.lastIndexOf("</body>")
+      htmlString.substring(begin, end)
+    }
 
     val html = extractNewContent(chatEditor.htmlText)
     log.debug(s"Send: $html")
@@ -164,31 +165,32 @@ class LobbyController(private val onlineTitledPane: TitledPane,
 
     def insertionIndex(stringToInsert: String): Int = {
       val indexDisplacement = stringToInsert.length
-      if (insertionIndexes.lastOption.fold(true){ case (t,i) ⇒ timestamp >= t}) {
+      if (insertionIndexes.lastOption.fold(true) { case (t, i) ⇒ timestamp >= t }) {
         val index = bottomInsertionIndex
         bottomInsertionIndex = index + indexDisplacement
         insertionIndexes = insertionIndexes + (timestamp → index)
         index
-      } else {
+      }
+      else {
         val pivotIndex = (insertionIndexes to timestamp).size
         val (beforeMap, afterMap) = insertionIndexes.splitAt(pivotIndex)
         assert(!afterMap.isEmpty)
         val insertionIndexIntoWeb = afterMap(0)
-        val updatedAfterMap = afterMap.map{case (k,v) ⇒ k → (v + indexDisplacement)}
+        val updatedAfterMap = afterMap.map { case (k, v) ⇒ k → (v + indexDisplacement) }
         insertionIndexes = (beforeMap + (timestamp → insertionIndexIntoWeb)) ++ updatedAfterMap
         insertionIndexIntoWeb
       }
     }
 
     def integrateNewContent(): Unit = {
-        val divString = s"""<div><table>
+      val divString = s"""<div><table>
                             |<colgroup><col style="background-color:rgb($r, $g, $b);"></colgroup>
                             |<tr><td $headerStyle>$senderView</td><td rowspan="3" $contentStyle>$htmlText</td></tr>
                             |<tr><td $headerStyle>$dateView</td></tr>
                             |<tr><td $headerStyle>$timeView</td></tr>
                             |</table><hr style="$HrStyle"/></div>""".stripMargin
-        htmlBuilder.insert(insertionIndex(divString), divString)
-      }
+      htmlBuilder.insert(insertionIndex(divString), divString)
+    }
 
     val newHtmlText = integrateNewContent()
     log.debug(s"New HTML=$newHtmlText")
