@@ -60,7 +60,7 @@ trait ChatHandler {
   def handleLeft(username: String, roomName: String) =
     listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.left(username))
 
-  def handleChat(id: UUID, username: String, roomName: String, htmlText: String) = {
+  def handleChat(id: MessageId, username: String, roomName: String, htmlText: String) = {
     listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveChat(id, username, htmlText))
   }
 
@@ -79,12 +79,12 @@ trait ChatHandler {
     tcpClient ! LeaveChat(username, roomName)
 
   def sendChat(roomName: String, username: String, htmlText: String) =
-    tcpClient ! Chat(None, username, roomName, htmlText)
+    tcpClient ! Chat(username, roomName, htmlText)
 }
 
 trait ChatListener {
   def joined(username: String): Unit
   def left(username: String): Unit
-  def receiveChat(id: UUID, sender: String, htmlText: String) : Unit
+  def receiveChat(id: MessageId, sender: String, htmlText: String) : Unit
   def receiveHistory(history: List[Chat]): Unit
 }

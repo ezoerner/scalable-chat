@@ -74,7 +74,7 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
     case OpenLobby(username) ⇒ openLobby(username)
     case Joined(username, roomName) ⇒ handleJoined(username, roomName)
     case LeaveChat(username, roomName) ⇒ handleLeft(username, roomName)
-    case Chat(id, username, roomName, htmlText) ⇒ handleChat(id.get, username, roomName, htmlText)
+    case Chat(username, roomName, htmlText, id) ⇒ handleChat(id, username, roomName, htmlText)
     case History(roomName, history) ⇒ handleHistory(roomName, history)
     case msg ⇒ log.info(s"Supervisor received: $msg")
   }

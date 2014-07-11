@@ -18,12 +18,13 @@ package scalable.infrastructure
 
 import java.util.UUID
 
-import akka.actor.ActorRef
-import akka.event.Logging
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.serialization.SerializationExtension
-import reactivemongo.bson.buffer.ArrayBSONBuffer
-import scalable.GlobalEnv._
-import reactivemongo.bson._
+import akka.util.ByteString
+
+import scala.util.Try
+import scala.pickling._
+import scala.pickling.binary._
 
 /**
  * Implicit BSON readers and writers for various data types.
@@ -35,54 +36,31 @@ import reactivemongo.bson._
  */
 package object api {
 
-  trait SerializableReader[T <: Serializable] extends BSONReader[BSONBinary, T] {
-    val clazz: Class[T]
-    override def read(bson: BSONBinary): T = {
-      val bytes = bson.value.readArray(bson.value.readable())
-      val tryT = SerializationExtension(system).deserialize[T](bytes, clazz)
-      tryT.recover{
-        case ex: Throwable ⇒
-          ex.printStackTrace()
-          throw ex
-      }.get
-    }
+  // TODO: Figure out how to create a custom pickler for ActorRefs
+
+  def unpickleActorRef(bytes: ByteString)(implicit actorSystem: ActorSystem): ActorRef =
+    specialUnpickle(bytes, classOf[ActorRef])
+
+  def pickleActorRef(actorRef: ActorRef)(implicit actorSystem: ActorSystem): ByteString = {
+    specialPickle(actorRef)
   }
 
-  trait SerializableWriter[T <: AnyRef] extends BSONWriter[T, BSONValue] {
-
-    override def write(serializable: T): BSONValue = {
-      val tryBytes = SerializationExtension(system).serialize(serializable)
-      val bytes = tryBytes.recover {
-        case ex: Throwable ⇒
-          ex.printStackTrace()
-          throw ex
-      }.get
-      BSONBinary(bytes, Subtype.GenericBinarySubtype)
-    }
+  private def specialUnpickle[T](bytes: ByteString, clazz: Class[T])(implicit actorSystem: ActorSystem): T = {
+    val tryT = SerializationExtension(actorSystem).deserialize[T](bytes.toArray, clazz)
+    tryT.recover {
+      case ex: Throwable ⇒
+        ex.printStackTrace()
+        throw ex
+    }.get
   }
 
-
-  implicit object ActorRefReader extends SerializableReader[ActorRef] {
-    val clazz: Class[ActorRef] = classOf[ActorRef]
+  private def specialPickle(serializable: AnyRef)(implicit actorSystem: ActorSystem): ByteString = {
+    val tryBytes: Try[Array[Byte]] = SerializationExtension(actorSystem).serialize(serializable)
+    val bytes: Array[Byte] = tryBytes.recover {
+      case ex ⇒
+        ex.printStackTrace()
+        throw ex
+    }.get
+    ByteString(bytes)
   }
-
-  implicit object ActorRefWriter extends SerializableWriter[ActorRef]
-
-  implicit object UuidReader extends BSONReader[BSONBinary, UUID] {
-    override def read(bson: BSONBinary): UUID = {
-      val mostSigBits = bson.value.readLong()
-      val leastSigBits = bson.value.readLong()
-      assert(bson.value.readable() == 0)
-      new UUID(mostSigBits, leastSigBits)
-    }
-  }
-
-  implicit object UuidWriter extends BSONWriter[UUID, BSONBinary] {
-    override def write(uuid: UUID): BSONBinary = {
-      val writableBuffer = new ArrayBSONBuffer()
-      writableBuffer.writeLong(uuid.getMostSignificantBits).writeLong(uuid.getLeastSignificantBits)
-      BSONBinary(writableBuffer.toReadableBuffer(), Subtype.GenericBinarySubtype)
-    }
-  }
-
 }

@@ -17,8 +17,8 @@
 package scalable.server
 
 import akka.actor._
-import scalable.infrastructure.api.LoginResult
-import scalable.infrastructure.api.ResultStatus._
+
+import scalable.infrastructure.api._
 
 /**
  * State for a registered user (whether currently online or not).
@@ -31,13 +31,13 @@ object UserSession {
 }
 
 class UserSession(login: ServerLogin) extends Actor with ActorLogging {
+  import context.system
   val username = login.username
   val password = login.password
   var tcpConnector = login.connector
 
-
   // For a newly created session, send LoginResult back to client for successful login
-  tcpConnector ! LoginResult(Ok, login.username, login.replyTo)
+  tcpConnector ! LoginResult(Ok(), login.username, login.replyTo)
   loggedIn()
 
   override def receive: Receive = {
@@ -48,8 +48,8 @@ class UserSession(login: ServerLogin) extends Actor with ActorLogging {
       val resultStatus = if (msg.password == login.password) {
         tcpConnector = msg.connector
         loggedIn()
-        Ok
-      } else WrongPassword
+        Ok()
+      } else WrongPassword()
       msg.connector ! LoginResult(resultStatus, msg.username, msg.replyTo)
   }
 

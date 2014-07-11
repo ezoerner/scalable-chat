@@ -8,8 +8,6 @@ akkaVersion in ThisBuild := "2.3.3"
 
 parallelExecution in Test := false
 
-reactiveMongoVersion in ThisBuild := "0.10.0"
-
 lazy val infrastructure = project
 
 lazy val client = project.dependsOn(server % "test->compile",

@@ -44,10 +44,10 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
       case msg: LoginResult ⇒
         log.debug(s"received $msg")
         log.debug(s"Sending LoginResult to ${msg.replyTo}")
-        msg.replyTo ! msg
+        unpickleActorRef(msg.replyTo) ! msg
       case msg: Participants ⇒
         log.debug(s"received $msg")
-        msg.replyTo ! msg
+        unpickleActorRef(msg.replyTo) ! msg
       case msg: SerializableMessage ⇒
         log.debug(s"received $msg")
         systemListener ! msg
@@ -87,13 +87,17 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
 }
 
 trait CorrelatedRequest {
-  def remoteRequest(replyTo: ActorRef): SerializableMessage
+  def remoteRequest(replyTo: ActorRef)(implicit system: ActorSystem): SerializableMessage
 }
 
 case class ClientAskLogin(username: String, password: String) extends CorrelatedRequest {
-  override def remoteRequest(replyTo: ActorRef) = AskLogin(username, password, replyTo)
+  override def remoteRequest(replyTo: ActorRef)(implicit system: ActorSystem) = {
+    AskLogin(username, password, pickleActorRef(replyTo))
+  }
 }
 
 case class ClientAskParticipants(roomName: String) extends CorrelatedRequest {
-  override def remoteRequest(replyTo: ActorRef) = AskParticipants(roomName, replyTo)
+  override def remoteRequest(replyTo: ActorRef)(implicit system: ActorSystem) = {
+    AskParticipants(roomName, pickleActorRef(replyTo))
+  }
 }

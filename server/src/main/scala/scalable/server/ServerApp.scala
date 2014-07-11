@@ -17,6 +17,7 @@
 package scalable.server
 
 import akka.actor._
+import akka.util.ByteString
 import scalable.infrastructure.api._
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{ClientDisconnected, NewConnection, TcpService}
@@ -87,6 +88,6 @@ class ServerApp extends Actor with ActorLogging {
   }
 }
 
-case class ServerLogin(username: String, password: String, replyTo: ActorRef, connector: ActorRef)
+case class ServerLogin(username: String, password: String, replyTo: ByteString, connector: ActorRef)
 case class ServerJoin(username: String, roomName: String, connector: ActorRef)
-case class ServerAskParticipants(roomName: String, replyTo: ActorRef, connector: ActorRef)
+case class ServerAskParticipants(roomName: String, replyTo: ByteString, connector: ActorRef)

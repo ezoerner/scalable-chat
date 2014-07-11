@@ -2,9 +2,10 @@ parallelExecution in Test := false
 
 libraryDependencies ++= {
   Seq(
-    "org.reactivemongo"   %%   "reactivemongo-bson"      % reactiveMongoVersion.value,
-    "org.specs2"          %%  "specs2"                   % "2.3.12" % "test",
-    "com.typesafe.akka"   %%  "akka-actor"               % akkaVersion.value
+    "org.specs2"            %%  "specs2"                  % "2.3.12" % "test",
+    "com.typesafe.akka"     %%  "akka-actor"              % akkaVersion.value,
+    "org.scala-lang"        %%  "scala-pickling"          % "0.8.0",
+    "com.datastax.cassandra" %  "cassandra-driver-core"   % "2.0.2"
   )
 }
 

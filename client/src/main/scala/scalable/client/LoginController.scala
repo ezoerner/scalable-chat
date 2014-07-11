@@ -20,12 +20,11 @@ import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
-import scalable.client.tcp.ClientAskLogin
-import scalable.infrastructure.api.LoginResult
-import scalable.infrastructure.api.ResultStatus._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scalable.client.tcp.ClientAskLogin
+import scalable.infrastructure.api._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent
 import scalafx.scene.control.TextField
@@ -65,7 +64,7 @@ class LoginController(private val usernameField: TextField,
       (tcpClient ? ClientAskLogin(usernameField.text.value, passwordField.text.value)).mapTo[LoginResult]
 
     futureResponse.onSuccess{
-      case LoginResult(Ok, username, _) if username == usernameField.text.value ⇒
+      case LoginResult(Ok(), username, _) if username == usernameField.text.value ⇒
         log.debug("Successful Login")
         appSupervisor ! OpenLobby(username)
         // opening a new PrimaryStage will reuse this same window

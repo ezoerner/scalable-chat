@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 import scalable.client.chat.views.Browser
 import scalable.client.chat.{ChatHandler, ChatListener}
-import scalable.infrastructure.api.Chat
+import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent
@@ -40,7 +40,6 @@ import scalafx.scene.text.Text
 import scalafx.scene.web._
 import scalafx.stage.Stage
 import scalafxml.core.macros.sfxml
-
 /**
  * Controller for Lobby window.
  *
@@ -120,14 +119,14 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     }
   }
 
-  override def receiveChat(id: UUID, sender: String, htmlText: String): Unit = {
-    updateHtmlBuilderWithNewContent(unixTimestamp(id), sender, htmlText)
+  override def receiveChat(id: MessageId, sender: String, htmlText: String): Unit = {
+    updateHtmlBuilderWithNewContent(id.unixTimestamp, sender, htmlText)
     updateBrowser()
   }
 
   override def receiveHistory(history: List[Chat]): Unit = {
-    history.foreach { case Chat(id, sender, _, htmlText) ⇒
-      updateHtmlBuilderWithNewContent(unixTimestamp(id.get), sender, htmlText)
+    history.foreach { case Chat(sender, _, htmlText, id) ⇒
+      updateHtmlBuilderWithNewContent(id.unixTimestamp, sender, htmlText)
     }
     updateBrowser()
   }
