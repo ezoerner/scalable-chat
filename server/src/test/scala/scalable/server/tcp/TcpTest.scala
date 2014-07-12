@@ -20,6 +20,8 @@ import java.net.InetSocketAddress
 
 import akka.actor.ActorRef
 import akka.io.Tcp._
+import scalable.infrastructure.api.{ AskLogin, LoginResult, ResultStatus }
+import scalable.server.{ AkkaTestkitSpecs2Support, Configuration }
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 
@@ -53,7 +55,7 @@ class TcpTest extends Specification with NoTimeConversions {
     "transfer a Login message from client to server" in new TcpClientAndServer {
       within(5.second) {
         val (tcpClient, _) = clientAndServer
-        val msg = AskLogin("user", "password", pickleActorRef(tcpClient))
+        val msg = AskLogin("user", "password", tcpClient)
         tcpClient ! msg.toByteString
         expectMsgType[AskLogin] must be equalTo msg
       }
@@ -62,7 +64,7 @@ class TcpTest extends Specification with NoTimeConversions {
     "transfer a LoginResult message from server to client" in new TcpClientAndServer {
       within(5.second) {
         val (_, tcpServer) = clientAndServer
-        tcpServer ! LoginResult(Ok(), "user", pickleActorRef(tcpServer))
+        tcpServer ! LoginResult(ResultStatus.Ok, "user", tcpServer)
         expectMsgType[LoginResult]
       }
     }

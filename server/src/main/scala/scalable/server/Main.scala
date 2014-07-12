@@ -19,15 +19,17 @@ package scalable.server
 import akka.actor._
 import com.typesafe.config.ConfigFactory
 
+import scalable.GlobalEnv
+
 /**
  * Main entry point for the server app.
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 object Main {
-  lazy val system = ActorSystem("Main")
 
   def main(args: Array[String]): Unit = {
+    val system = GlobalEnv.createActorSystem("Main")
     val a = system.actorOf(Props[ServerApp], "app")
     system.actorOf(Props(classOf[Terminator], a), "terminator")
   }
@@ -37,7 +39,7 @@ object Main {
     def receive = {
       case Terminated(_) ⇒
         log.info("{} has terminated, shutting down system", ref.path)
-        system.shutdown()
+        GlobalEnv.shutdownActorSystem()
     }
   }
 }

@@ -16,7 +16,7 @@
 
 package scalable.server.chat
 
-import akka.actor._
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import com.datastax.driver.core.utils.UUIDs
 
 import scala.collection.mutable
@@ -33,12 +33,11 @@ object ChatRoom {
 
 class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
   var participants = Map[String, ActorRef]()
-  import context.system
 
   // for now history is only chat messages, may need to expand that later;
   // ordering by timestamp alone is good enough, if there are multiple messages with the same
   // timestamp then the ordering between them is non-deterministic
-  val messageHistory = mutable.SortedSet[Chat]()(Ordering.by { chat ⇒ chat.id.timeBasedUuid.timestamp })
+  val messageHistory = mutable.SortedSet[Chat]()(Ordering.by { _.id.get.timestamp })
 
   def broadcast(msg: SerializableMessage): Unit =
     participants.values.foreach(_ ! msg)
@@ -68,11 +67,11 @@ class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
         broadcast(msg)
       }
 
-    case msg @ Chat(sender, rmName, htmlText, id) ⇒
-      assert(id == null)
+    case msg @ Chat(id, sender, rmName, htmlText) ⇒
+      assert(id.isEmpty)
       assert(rmName == roomName)
-      val newUuid = UUIDs.timeBased
-      val chatWithId = msg.copy(id = MessageId(newUuid))
+      val messageId = UUIDs.timeBased
+      val chatWithId = msg.copy(id = Some(messageId))
       messageHistory += chatWithId
       broadcast(chatWithId)
   }

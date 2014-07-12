@@ -25,12 +25,12 @@ lazy val resolverSettings = Seq(resolvers ++= Seq())
 
 lazy val commonSubmoduleDependencies = libraryDependencies ++= Seq(
                   "org.specs2"            %%  "specs2"                  % "2.3.12" % "test",
-                  "com.typesafe.akka"     %%  "akka-actor"              % akkaVersion)
+                  "com.typesafe.akka"     %%  "akka-actor"              % akkaVersion,
+                  "org.reactivemongo"      %%  "reactivemongo-bson"     % "0.10.0")
 
 lazy val infrastructure = project.settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
   .settings(libraryDependencies ++= Seq(
-                  "org.scala-lang"        %%  "scala-pickling"          % "0.8.0",
                   "com.datastax.cassandra" %  "cassandra-driver-core"   % "2.0.2"))
 
 // Fork a new JVM for 'run' and 'test:run', to avoid JavaFX double initialization problems

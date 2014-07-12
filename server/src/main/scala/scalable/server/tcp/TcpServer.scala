@@ -26,7 +26,7 @@ object TcpServer {
 class TcpServer(private val connection: ActorRef, private val listener: ActorRef)
     extends Actor with ActorLogging {
   var trackedUser: Option[String] = None
-  import context.system
+  implicit val system = context.system
 
   import akka.io.Tcp._
 
@@ -45,7 +45,7 @@ class TcpServer(private val connection: ActorRef, private val listener: ActorRef
     case ConfirmedClosed ⇒ stop()
     case Aborted         ⇒ stop()
 
-    case msg @ LoginResult(resultStatus, username, _) if resultStatus == Ok ⇒
+    case msg @ LoginResult(resultStatus, username, _) if resultStatus == ResultStatus.Ok ⇒
       trackedUser = Some(username)
       log.debug(s"Writing $msg to connection")
       connection ! Write(msg.toByteString)
