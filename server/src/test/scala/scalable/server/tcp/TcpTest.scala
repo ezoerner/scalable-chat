@@ -20,8 +20,6 @@ import java.net.InetSocketAddress
 
 import akka.actor.ActorRef
 import akka.io.Tcp._
-import scalable.infrastructure.api.{ AskLogin, LoginResult, ResultStatus }
-import scalable.server.{ AkkaTestkitSpecs2Support, Configuration }
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 

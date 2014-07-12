@@ -25,8 +25,7 @@ lazy val resolverSettings = Seq(resolvers ++= Seq())
 
 lazy val commonSubmoduleDependencies = libraryDependencies ++= Seq(
                   "org.specs2"            %%  "specs2"                  % "2.3.12" % "test",
-                  "com.typesafe.akka"     %%  "akka-actor"              % akkaVersion,
-                  "org.reactivemongo"      %%  "reactivemongo-bson"     % "0.10.0")
+                  "com.typesafe.akka"     %%  "akka-actor"              % akkaVersion)
 
 lazy val infrastructure = project.settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
