@@ -7,7 +7,7 @@ lazy val akkaVersion = "2.3.4"
 lazy val commonSettings = scalariformSettings ++ resolverSettings ++
                           releaseSettings ++  // ++ publishSettings
                           net.virtualvoid.sbt.graph.Plugin.graphSettings ++
-                          Seq(scalaVersion := "2.10.3",
+                          Seq(scalaVersion := "2.11.1",
                               scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8"),
                               parallelExecution in Test := false,
                               organization := "scalable_chat",
@@ -41,8 +41,8 @@ lazy val client = project.dependsOn(server % "test->compile",
             addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0" cross CrossVersion.full))
   .settings(commonSubmoduleDependencies)
   .settings(libraryDependencies ++= Seq(
-                  "org.scalafx"         %%  "scalafx"                 % "8.0.0-R4",
-                  "org.scalafx"         %%  "scalafxml-core"          % "0.2"))
+                  "org.scalafx"         %%  "scalafx"            % "8.0.0-R4",
+                  "org.scalafx"         %%  "scalafxml-core"     % "0.2.1-SNAPSHOT"))
 
 lazy val server = project.dependsOn(infrastructure)
   .settings(commonSettings: _*)
