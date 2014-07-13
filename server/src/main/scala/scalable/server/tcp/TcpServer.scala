@@ -17,6 +17,7 @@
 package scalable.server.tcp
 
 import akka.actor._
+
 import scalable.infrastructure.api._
 
 object TcpServer {
@@ -45,12 +46,12 @@ class TcpServer(private val connection: ActorRef, private val listener: ActorRef
     case ConfirmedClosed ⇒ stop()
     case Aborted         ⇒ stop()
 
-    case msg @ LoginResult(resultStatus, username, _) if resultStatus == ResultStatus.Ok ⇒
+    case msg @ LoginResult(resultStatus, username) if resultStatus == ResultStatus.Ok ⇒
       trackedUser = Some(username)
       log.debug(s"Writing $msg to connection")
       connection ! Write(msg.toByteString)
     case msg: SerializableMessage ⇒
-      log.debug(s"Writing $msg to connection")
+      log.debug(s"Writing $msg to connection for $trackedUser")
       connection ! Write(msg.toByteString)
   }
 

@@ -18,16 +18,11 @@ package scalable.client.chat
 
 import java.util.UUID
 
-import akka.actor.{ Actor, ActorLogging }
-import akka.pattern.ask
+import akka.actor.{Actor, ActorLogging}
 import akka.util.Timeout
 
-import scala.collection.SortedMap
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalable.client._
-import scalable.client.tcp.ClientAskParticipants
 import scalable.infrastructure.api._
 
 /**
@@ -46,24 +41,17 @@ trait ChatHandler {
 
   var listeners = Map[String, ChatListener]()
 
-  def getInitialParticipants(roomName: String): Future[List[String]] = {
-    val futureResponse = (tcpClient ? ClientAskParticipants(roomName)).mapTo[Participants]
-    futureResponse.map(_.participants)
-  }
-
   def handleJoined(username: String, roomName: String) =
     listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.joined(username))
 
   def handleLeft(username: String, roomName: String) =
     listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.left(username))
 
-  def handleChat(id: UUID, username: String, roomName: String, htmlText: String) = {
+  def handleChat(id: UUID, username: String, roomName: String, htmlText: String) =
     listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveChat(id, username, htmlText))
-  }
 
-  def handleHistory(roomName: String, history: List[Chat]) = {
-    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveHistory(history))
-  }
+  def handleRoomInfo(roomName: String, history: List[Chat], participants: List[String]) =
+    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveRoomInfo(history, participants))
 
   def addChatListener(listener: ChatListener, room: String) = {
     listeners = listeners + (room → listener)
@@ -83,5 +71,5 @@ trait ChatListener {
   def joined(username: String): Unit
   def left(username: String): Unit
   def receiveChat(id: UUID, sender: String, htmlText: String): Unit
-  def receiveHistory(history: List[Chat]): Unit
+  def receiveRoomInfo(history: List[Chat], participants: List[String]): Unit
 }

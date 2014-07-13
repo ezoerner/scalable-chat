@@ -18,14 +18,11 @@ package scalable.client
 
 import akka.actor.ActorSystem
 import akka.event.Logging
-import akka.pattern.{ AskTimeoutException, ask }
-import akka.util.Timeout
-import scalable.client.tcp.ClientAskLogin
-import scalable.infrastructure.api.LoginResult
-import scalable.infrastructure.api.ResultStatus._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scalable.infrastructure.api.AskLogin
+import scalable.infrastructure.api.ResultStatus._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent
 import scalafx.scene.control.TextField
@@ -38,16 +35,15 @@ import scalafxml.core.macros.sfxml
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
-
 @sfxml
 class LoginController(private val usernameField: TextField,
                       private val passwordField: TextField,
                       private val failedText: Text,
                       private val timedOutText: Text,
                       private val root: GridPane,
-                      private val actorSystem: ActorSystem) {
+                      private val actorSystem: ActorSystem) extends LoginResultHandler {
   private val log = Logging(actorSystem, this.getClass)
-  private implicit val timeout: Timeout = 5.seconds
+  @volatile private var waiting = true
 
   def onKeyTyped(): Unit = {
     failedText.visible.value = false
@@ -58,28 +54,28 @@ class LoginController(private val usernameField: TextField,
     timedOutText.visible.value = false
 
     val tcpClient = tcpClientSelection(actorSystem)
-    val appSupervisor = appSupervisorSelection(actorSystem)
 
-    log.debug("Asking the tcpClient with Login")
-    val futureResponse =
-      (tcpClient ? ClientAskLogin(usernameField.text.value, passwordField.text.value)).mapTo[LoginResult]
+    tcpClient ! AskLogin(usernameField.text.value, passwordField.text.value)
 
-    futureResponse.onSuccess {
-      case LoginResult(Ok, username, _) if username == usernameField.text.value ⇒
-        log.debug("Successful Login")
-        appSupervisor ! OpenLobby(username)
-      // opening a new PrimaryStage will reuse this same window
-      case LoginResult(status, username, _) ⇒
-        Platform.runLater(failedText.visible.value = true)
-        log.error(s"Unsuccessful login: $status, $username")
-      case msg ⇒
-        log.error(s"Received unknown message: $msg")
-    }
-
-    futureResponse.recover {
-      case ex: AskTimeoutException ⇒
+    // start a timer to timeout if no response is received
+    actorSystem.scheduler.scheduleOnce(5.seconds) {
+      if (waiting) {
         log.error("Unsuccessful login: Timed Out")
         Platform.runLater(timedOutText.visible.value = true)
+      }
+    }
+  }
+
+  override def loginResult(resultStatus: ResultStatus, username: String) = {
+    val appSupervisor = appSupervisorSelection(actorSystem)
+    waiting = false
+    resultStatus match {
+      case Ok ⇒
+        log.debug("Successful Login")
+        appSupervisor ! OpenLobby(username)
+      case WrongPassword ⇒
+        Platform.runLater(failedText.visible.value = true)
+        log.error(s"Unsuccessful login: $resultStatus, $username")
     }
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import scalable.client.Main$;
+import scalable.client.Main;
 
 /**
  * Need a real static main method as entry point to help with packaging as native app.
@@ -27,6 +27,6 @@ public class Start {
     }
 
     public static void main(String[] args) {
-        Main$.MODULE$.main(args);
+        new Main().main(args);
     }
 }

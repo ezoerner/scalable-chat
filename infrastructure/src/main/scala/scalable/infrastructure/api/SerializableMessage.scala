@@ -18,7 +18,7 @@ package scalable.infrastructure.api
 
 import java.util.UUID
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.ActorSystem
 import akka.serialization.SerializationExtension
 import akka.util.ByteString
 
@@ -46,30 +46,21 @@ sealed trait SerializableMessage extends Serializable {
   }
 }
 
-case class AskLogin(username: String, password: String, replyTo: ActorRef)
+case class AskLogin(username: String, password: String)
   extends SerializableMessage
 
-case class LoginResult(result: ResultStatus, username: String, replyTo: ActorRef)
+case class LoginResult(result: ResultStatus, username: String)
   extends SerializableMessage
 
 case class Join(username: String, roomName: String)
   extends SerializableMessage
 
-case class Joined(username: String, roomName: String)
-  extends SerializableMessage
-
 case class LeaveChat(username: String, roomName: String)
-  extends SerializableMessage
-
-case class AskParticipants(roomName: String, replyTo: ActorRef)
-  extends SerializableMessage
-
-case class Participants(roomName: String, participants: List[String], replyTo: ActorRef)
   extends SerializableMessage
 
 // The id is a server-generated time-based UUID, filled in by the server
 case class Chat(id: Option[UUID], sender: String, roomName: String, htmlText: String)
   extends SerializableMessage
 
-case class History(roomName: String, history: List[Chat])
+case class RoomInfo(roomName: String, history: List[Chat], participants: List[String])
   extends SerializableMessage

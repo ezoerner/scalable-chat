@@ -17,19 +17,19 @@
 package scalable.client
 
 import java.text.DateFormat
-import java.util.{ Date, UUID }
-import javafx.beans.value.{ ChangeListener, ObservableValue }
+import java.util.{Date, UUID}
+import javafx.beans.value.{ChangeListener, ObservableValue}
+import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.stage.WindowEvent
 
 import akka.actor.ActorSystem
 import akka.event.Logging
 
+import scala.collection.JavaConverters._
 import scala.collection.SortedMap
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{ Failure, Success }
 import scalable.client.chat.views.Browser
-import scalable.client.chat.{ ChatHandler, ChatListener }
+import scalable.client.chat.{ChatHandler, ChatListener}
 import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.Platform
@@ -40,7 +40,6 @@ import scalafx.scene.text.Text
 import scalafx.scene.web._
 import scalafx.stage.Stage
 import scalafxml.core.macros.sfxml
-
 /**
  * Controller for Lobby window.
  *
@@ -69,14 +68,6 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private val timeFormat = DateFormat.getTimeInstance
 
   override def setStageAndSetupListeners(stage: Stage): Unit = {
-    chatHandler.getInitialParticipants(RoomName).onComplete {
-      case Success(participants) ⇒ Platform.runLater {
-        log.info(s"initial participants=$participants")
-        onlineListView.items.get() ++= participants
-        ()
-      }
-      case Failure(t) ⇒ log.error(t, "Error while trying to get participants")
-    }
     usernameText.text = username
     assert(onlineTitledPane != null)
     accordion.expandedPane = onlineTitledPane
@@ -106,7 +97,9 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   override def joined(username: String): Unit = {
     log.debug(s"$username joined Lobby")
     Platform.runLater {
-      if (onlineListView.items.get().add(username)) {
+      val list = onlineListView.items.get()
+      if (!list.contains(username)) {
+        list.add(username)
         onlineListView.items.get().sort()
       }
     }
@@ -125,13 +118,24 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     updateBrowser()
   }
 
-  override def receiveHistory(history: List[Chat]): Unit = {
+  override def receiveRoomInfo(history: List[Chat], participants: List[String]): Unit = {
     history.foreach {
       case Chat(id, sender, _, htmlText) ⇒
         updateHtmlBuilderWithNewContent(unixTimestamp(id.get), sender, htmlText)
     }
     updateBrowser()
+    receiveParticipants(participants)
   }
+
+  private def receiveParticipants(participants: List[String]): Unit =
+    Platform.runLater {
+      log.debug(s"received participants=$participants")
+      val previousList: ObservableList[String] = onlineListView.items.get()
+      val newParticipants: Set[String] = previousList.toSet ++ participants
+      onlineListView.items.get().setAll(newParticipants.asJavaCollection)
+      onlineListView.items.get().sort()
+      ()
+    }
 
   private def updateBrowser() = {
     browser.setContent(htmlBuilder.mkString)
@@ -183,18 +187,13 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       }
     }
 
-    def integrateNewContent(): Unit = {
-      val divString = s"""<div><table>
-                            |<colgroup><col style="background-color:rgb($r, $g, $b);"></colgroup>
-                            |<tr><td $headerStyle>$senderView</td><td rowspan="3" $contentStyle>$htmlText</td></tr>
-                            |<tr><td $headerStyle>$dateView</td></tr>
-                            |<tr><td $headerStyle>$timeView</td></tr>
-                            |</table><hr style="$HrStyle"/></div>""".stripMargin
-      htmlBuilder.insert(insertionIndex(divString), divString)
-    }
-
-    val newHtmlText = integrateNewContent()
-    log.debug(s"New HTML=$newHtmlText")
-    newHtmlText
+    val divString = s"""<div><table>
+                          |<colgroup><col style="background-color:rgb($r, $g, $b);"></colgroup>
+                          |<tr><td $headerStyle>$senderView</td><td rowspan="3" $contentStyle>$htmlText</td></tr>
+                          |<tr><td $headerStyle>$dateView</td></tr>
+                          |<tr><td $headerStyle>$timeView</td></tr>
+                          |</table><hr style="$HrStyle"/></div>""".stripMargin
+    htmlBuilder.insert(insertionIndex(divString), divString)
   }
+
 }

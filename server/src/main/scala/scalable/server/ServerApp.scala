@@ -17,11 +17,11 @@
 package scalable.server
 
 import akka.actor._
-import scalable.infrastructure.api._
-import scalable.server.chat.ChatRoom
-import scalable.server.tcp.{ ClientDisconnected, NewConnection, TcpService }
 
 import scala.util.Try
+import scalable.infrastructure.api._
+import scalable.server.chat.ChatRoom
+import scalable.server.tcp.{ClientDisconnected, NewConnection, TcpService}
 
 /**
  * Root actor of the server application.
@@ -37,21 +37,21 @@ class ServerApp extends Actor with ActorLogging {
   context.actorOf(TcpService.props(self), "tcpService")
   lazy val lobbyChatRoom = context.actorOf(ChatRoom.props("Lobby"), "lobby")
 
-  private def login(login: ServerLogin): Unit = {
+  private def login(login: AskLogin, connector: ActorRef): Unit = {
     // We use dead simple authentication logic.
     // if a session already exists for this user then the passwords will be checked.
     // if the passwords are the same then the user rejoins the session
     // otherwise the username is already taken and login is rejected
 
-    def createSession(login: ServerLogin): Try[ActorRef] = {
-      Try(context.actorOf(UserSession.props(login), login.username))
+    def createSession(): Try[ActorRef] = {
+      Try(context.actorOf(UserSession.props(login, connector), UserSession.userSessionName(login.username)))
     }
 
-    val newSession = createSession(login)
+    val newSession = createSession()
     newSession.recover {
       case _: InvalidActorNameException ⇒
         // existing session will verify password and send back a LoginResult
-        context.actorSelection(login.username) ! login
+        context.actorSelection(UserSession.userSessionName(login.username)) ! (login, connector)
       case ex ⇒ throw ex
     }
   }
@@ -59,19 +59,16 @@ class ServerApp extends Actor with ActorLogging {
   override def receive = {
     case msg: AskLogin ⇒
       log.debug(s"Received $msg")
-      login(ServerLogin(msg.username, msg.password, msg.replyTo, sender()))
+      login(msg, sender())
     case msg: NewConnection ⇒
       // not interested
       log.debug(s"Received $msg")
     case msg: Join ⇒
-      assert(msg.roomName == "Lobby") // "Lobby" is currently the only top-level chat room
-      lobbyChatRoom ! ServerJoin(msg.username, msg.roomName, sender())
+      assert(msg.roomName == "Lobby") // "Lobby" is currently the only chat room
+      lobbyChatRoom ! (msg, sender())
     case msg: LeaveChat ⇒
       assert(msg.roomName == "Lobby")
       lobbyChatRoom ! msg
-    case msg: AskParticipants ⇒
-      assert(msg.roomName == "Lobby")
-      lobbyChatRoom ! ServerAskParticipants(msg.roomName, msg.replyTo, sender())
     case msg: Chat ⇒
       assert(msg.roomName == "Lobby")
       lobbyChatRoom ! msg
@@ -84,7 +81,3 @@ class ServerApp extends Actor with ActorLogging {
     case msg ⇒ log.error(s"Received unexpected message: $msg")
   }
 }
-
-case class ServerLogin(username: String, password: String, replyTo: ActorRef, connector: ActorRef)
-case class ServerJoin(username: String, roomName: String, connector: ActorRef)
-case class ServerAskParticipants(roomName: String, replyTo: ActorRef, connector: ActorRef)

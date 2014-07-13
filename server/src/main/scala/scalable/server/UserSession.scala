@@ -17,7 +17,7 @@
 package scalable.server
 
 import akka.actor._
-import scalable.infrastructure.api.LoginResult
+import scalable.infrastructure.api.{ AskLogin, LoginResult }
 import scalable.infrastructure.api.ResultStatus._
 
 /**
@@ -26,31 +26,32 @@ import scalable.infrastructure.api.ResultStatus._
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 object UserSession {
-  def props(login: ServerLogin) = Props(new UserSession(login))
-  def userSessionName(username: String) = s"user/$username"
+  def props(login: AskLogin, connector: ActorRef) =
+    Props(new UserSession(login.username, login.password, connector))
+
+  def userSessionName(username: String) = s"user:$username"
 }
 
-class UserSession(login: ServerLogin) extends Actor with ActorLogging {
-  val username = login.username
-  val password = login.password
-  var tcpConnector = login.connector
+class UserSession(val username: String, val password: String, var tcpConnector: ActorRef)
+    extends Actor with ActorLogging {
+  log.debug("Constructing UserSession")
 
   // For a newly created session, send LoginResult back to client for successful login
-  tcpConnector ! LoginResult(Ok, login.username, login.replyTo)
+  tcpConnector ! LoginResult(Ok, username)
   loggedIn()
 
   override def receive: Receive = {
-    case msg: ServerLogin ⇒
+    case msg @ (login: AskLogin, connector: ActorRef) ⇒
       // login for existing session, verify password
       log.debug(s"Received $msg")
-      assert(msg.username == login.username)
-      val resultStatus = if (msg.password == login.password) {
-        tcpConnector = msg.connector
+      assert(login.username == username)
+      val resultStatus = if (login.password == password) {
+        tcpConnector = connector
         loggedIn()
         Ok
       }
       else WrongPassword
-      msg.connector ! LoginResult(resultStatus, msg.username, msg.replyTo)
+      connector ! LoginResult(resultStatus, login.username)
   }
 
   private def loggedIn(): Unit = {

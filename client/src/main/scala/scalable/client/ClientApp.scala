@@ -17,23 +17,21 @@
 package scalable.client
 
 import java.net.InetSocketAddress
-import java.util.UUID
 import javafx.scene.Parent
-import javafx.{ scene ⇒ jfxs }
+import javafx.{scene => jfxs}
 
 import akka.actor._
 import akka.io.Tcp.Connected
 
-import scala.collection.SortedMap
 import scala.reflect.runtime.universe.typeOf
 import scalable.client.chat.ChatHandler
 import scalable.client.tcp.TcpClient
 import scalable.infrastructure.api._
+import scalafx.Includes._
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.Platform
 import scalafx.scene.Scene
-import scalafxml.core.{ DependenciesByType, FXMLLoader }
-import scalafx.Includes._
+import scalafxml.core.{DependenciesByType, FXMLLoader}
 
 /**
  * Root actor, used for tracking the user's client session information.
@@ -42,10 +40,11 @@ import scalafx.Includes._
  */
 object ClientApp {
   val path = "root"
-  def props = Props(new ClientApp())
+  def props(loginResultHandler: LoginResultHandler) = Props(new ClientApp(loginResultHandler))
 }
 
-class ClientApp extends Actor with ActorLogging with ChatHandler {
+class ClientApp(val loginResultHandler: LoginResultHandler) extends Actor with ActorLogging with ChatHandler {
+  require(loginResultHandler != null)
   log.debug(s"ClientAppSupervisor path=${self.path.toStringWithoutAddress}")
 
   def tcpProps = TcpClient.props(new InetSocketAddress(Configuration.host, Configuration.portTcp), self)
@@ -70,13 +69,14 @@ class ClientApp extends Actor with ActorLogging with ChatHandler {
   }
 
   override def receive = {
-    case msg: Connected                         ⇒ log.info(msg.toString)
-    case OpenLobby(username)                    ⇒ openLobby(username)
-    case Joined(username, roomName)             ⇒ handleJoined(username, roomName)
-    case LeaveChat(username, roomName)          ⇒ handleLeft(username, roomName)
-    case Chat(id, username, roomName, htmlText) ⇒ handleChat(id.get, username, roomName, htmlText)
-    case History(roomName, history)             ⇒ handleHistory(roomName, history)
-    case msg                                    ⇒ log.info(s"Supervisor received: $msg")
+    case msg: Connected                            ⇒ log.info(msg.toString)
+    case OpenLobby(username)                       ⇒ openLobby(username)
+    case Join(username, roomName)                  ⇒ handleJoined(username, roomName)
+    case LeaveChat(username, roomName)             ⇒ handleLeft(username, roomName)
+    case Chat(id, username, roomName, htmlText)    ⇒ handleChat(id.get, username, roomName, htmlText)
+    case RoomInfo(roomName, history, participants) ⇒ handleRoomInfo(roomName, history, participants)
+    case LoginResult(resultStatus, username)       ⇒ loginResultHandler.loginResult(resultStatus, username)
+    case msg                                       ⇒ log.info(s"Supervisor received: $msg")
   }
 }
 

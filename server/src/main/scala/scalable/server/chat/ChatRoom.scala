@@ -16,12 +16,12 @@
 
 package scalable.server.chat
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.datastax.driver.core.utils.UUIDs
 
-import scala.collection.mutable
+import scala.collection.{SortedSet, mutable}
 import scalable.infrastructure.api._
-import scalable.server.{ ServerAskParticipants, ServerJoin }
+
 /**
  * Chat room actor.
  *
@@ -29,34 +29,41 @@ import scalable.server.{ ServerAskParticipants, ServerJoin }
  */
 object ChatRoom {
   def props(roomName: String) = Props(new ChatRoom(roomName))
-}
-
-class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
-  var participants = Map[String, ActorRef]()
 
   // for now history is only chat messages, may need to expand that later;
   // ordering by timestamp alone is good enough, if there are multiple messages with the same
   // timestamp then the ordering between them is non-deterministic
+  def newMessageHistory: SortedSet[Chat] = SortedSet[Chat]()(Ordering.by { _.id.get.timestamp })
+}
+
+case class ChatRoomState(participants: Map[String, ActorRef] = Map.empty,
+                         messageHistory: SortedSet[Chat] = ChatRoom.newMessageHistory) {
+
+}
+
+class ChatRoom(private val roomName: String) extends /*Persistent*/ Actor with ActorLogging {
+  var participants = Map[String, ActorRef]()
   val messageHistory = mutable.SortedSet[Chat]()(Ordering.by { _.id.get.timestamp })
+
+  //override def persistenceId: String = s"chatroom-$roomName"
+
+  //var state = ChatRoomState()
 
   def broadcast(msg: SerializableMessage): Unit =
     participants.values.foreach(_ ! msg)
 
-  override def receive = {
+  override def receive /*Command*/ : Receive = {
 
-    case ServerJoin(username, rmName, connector) ⇒
+    case (Join(username, rmName), connector: ActorRef) ⇒
       assert(rmName == roomName)
       val newParticipants = participants + (username → connector)
       val notAlreadyPresent = newParticipants.size > participants.size
       participants = newParticipants
       if (notAlreadyPresent) {
-        broadcast(Joined(username, roomName))
-        connector ! History(roomName, messageHistory.toList)
+        broadcast(Join(username, roomName))
+        // send history and participants messages to the joining user
+        connector ! RoomInfo(roomName, messageHistory.toList, participants.keySet.toList.sorted)
       }
-
-    case ServerAskParticipants(rmName, replyTo, connector) ⇒
-      assert(rmName == roomName)
-      connector ! Participants(roomName, participants.keySet.toList.sorted, replyTo)
 
     case msg @ LeaveChat(username, room) ⇒
       assert(room == roomName, room)
@@ -75,5 +82,8 @@ class ChatRoom(private val roomName: String) extends Actor with ActorLogging {
       messageHistory += chatWithId
       broadcast(chatWithId)
   }
+
+  //override def receiveRecover: Receive = ???
+
 }
 

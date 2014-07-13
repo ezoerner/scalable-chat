@@ -53,7 +53,7 @@ class TcpTest extends Specification with NoTimeConversions {
     "transfer a Login message from client to server" in new TcpClientAndServer {
       within(5.second) {
         val (tcpClient, _) = clientAndServer
-        val msg = AskLogin("user", "password", tcpClient)
+        val msg = AskLogin("user", "password")
         tcpClient ! msg.toByteString
         expectMsgType[AskLogin] must be equalTo msg
       }
@@ -62,7 +62,7 @@ class TcpTest extends Specification with NoTimeConversions {
     "transfer a LoginResult message from server to client" in new TcpClientAndServer {
       within(5.second) {
         val (_, tcpServer) = clientAndServer
-        tcpServer ! LoginResult(ResultStatus.Ok, "user", tcpServer)
+        tcpServer ! LoginResult(ResultStatus.Ok, "user")
         expectMsgType[LoginResult]
       }
     }

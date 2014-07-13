@@ -16,15 +16,20 @@
 
 package scalable.client
 
+import javafx.scene.Parent
+import javafx.{ scene ⇒ jfxs }
+
 import akka.actor._
 import com.typesafe.config.ConfigFactory
 
 import scala.reflect.runtime.universe.typeOf
 import scala.util.control.NonFatal
+import scalable.infrastructure.api.ResultStatus._
+import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
-import scalafxml.core.DependenciesByType
+import scalafxml.core.{ DependenciesByType, FXMLLoader }
 
 /**
  * Main entry point of client application.
@@ -32,33 +37,38 @@ import scalafxml.core.DependenciesByType
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 
-object Main extends JFXApp {
+class Main extends JFXApp {
   lazy val actorSystem = ActorSystem("Main")
 
   def dependencies = new DependenciesByType(Map(typeOf[ActorSystem] -> actorSystem))
-  val root = loadFxmlFile("Login.fxml", dependencies)
+
+  val loader: FXMLLoader = new FXMLLoader(getClass.getResource("Login.fxml"), dependencies)
+  val root: Parent = loader.load()
+  val loginResultHandler: LoginResultHandler = loader.getController()
+  require(loginResultHandler != null)
 
   stage = new PrimaryStage() {
     title = "Login / Register"
     scene = new Scene(root)
   }
 
-  override def main(args: Array[String]): Unit = {
-    val root = try {
-      actorSystem.actorOf(ClientApp.props, ClientApp.path)
-    }
-    catch {
-      case NonFatal(e) ⇒ actorSystem.shutdown(); throw e
-    }
-    actorSystem.actorOf(Terminator.props(root), Terminator.path)
-
-    // do not exit the application when last window closes
-    //Platform.implicitExit = false
-
-    super.main(args)
-
-    root ! PoisonPill
+  val rootActor = try {
+    actorSystem.actorOf(ClientApp.props(loginResultHandler), ClientApp.path)
   }
+  catch {
+    case NonFatal(e) ⇒
+      actorSystem.shutdown()
+      throw e
+  }
+  actorSystem.actorOf(Terminator.props(rootActor), Terminator.path)
+
+  override def stopApp() = {
+    rootActor ! PoisonPill
+  }
+}
+
+trait LoginResultHandler {
+  def loginResult(resultStatus: ResultStatus, username: String): Unit
 }
 
 object Configuration {

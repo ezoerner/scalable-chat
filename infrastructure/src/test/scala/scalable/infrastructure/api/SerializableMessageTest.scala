@@ -18,7 +18,7 @@ package scalable.infrastructure.api
 
 import java.util.UUID
 
-import akka.actor.{ Actor, ActorSystem, Props }
+import akka.actor.{Actor, ActorSystem}
 import org.specs2.mutable.Specification
 
 import scalable.infrastructure.api.ResultStatus._
@@ -36,18 +36,17 @@ class SerializableMessageTest extends Specification {
   }
 
   def testMessages(actorSystem: ActorSystem): List[SerializableMessage] = {
-    val ref = actorSystem.actorOf(Props(new TestActor()))
-    List(History("room", List(Chat(Some(UUID.randomUUID()), "sender", "room", "html"),
-      Chat(Some(UUID.randomUUID()), "sender", "room", "html"))),
-      LoginResult(Ok, "user", ref),
-      AskLogin("user", "password", ref),
-      AskParticipants("room", ref),
+    List(
+      RoomInfo("room", List(Chat(Some(UUID.randomUUID()), "sender", "room", "html"),
+        Chat(Some(UUID.randomUUID()), "sender", "room", "html")),
+        List("part1", "part2")),
+      LoginResult(Ok, "user"),
+      AskLogin("user", "password"),
       Join("user", "room"),
       LeaveChat("user", "room"),
       Chat(None, "sender", "room", "html"),
-      Chat(Some(UUID.randomUUID()), "sender", "room", "html"),
-      Participants("room", List("p1", "p2"), ref),
-      Joined("user", "room"))
+      Chat(Some(UUID.randomUUID()), "sender", "room", "html")
+    )
   }
 
   "Serializable messages" should {
