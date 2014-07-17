@@ -21,7 +21,7 @@ import javafx.scene.Parent
 import javafx.{ scene ⇒ jfxs }
 
 import akka.actor._
-import akka.io.Tcp.Connected
+import akka.io.Tcp.{ Connect, Connected }
 
 import scala.reflect.runtime.universe.typeOf
 import scalable.client.chat.{ ChatController, ChatHandler }
@@ -43,12 +43,18 @@ object ClientApp {
   def props(loginResultHandler: LoginResultHandler) = Props(new ClientApp(loginResultHandler))
 }
 
-class ClientApp(val loginResultHandler: LoginResultHandler) extends Actor with ActorLogging with ChatHandler {
+class ClientApp(private val loginResultHandler: LoginResultHandler) extends Actor with ActorLogging with ChatHandler {
   require(loginResultHandler != null)
   log.debug(s"ClientAppSupervisor path=${self.path.toStringWithoutAddress}")
 
-  def tcpProps = TcpClient.props(new InetSocketAddress(Configuration.host, Configuration.portTcp), self)
-  val tcpClient = context.actorOf(tcpProps, TcpClient.path)
+  private val tcpClient = context.actorOf(TcpClient.props(self), TcpClient.path)
+
+  private var login: Option[AskLogin] = None
+
+  def connect(host: String, port: Int, loginMsg: AskLogin) = {
+    login = Some(loginMsg)
+    tcpClient ! Connect(new InetSocketAddress(host, port))
+  }
 
   def openLobby(username: String): Unit = Platform.runLater {
     val loader: FXMLLoader = new FXMLLoader(getClass.getResource("Lobby.fxml"),
@@ -69,7 +75,11 @@ class ClientApp(val loginResultHandler: LoginResultHandler) extends Actor with A
   }
 
   override def receive = {
-    case msg: Connected                            ⇒ log.info(msg.toString)
+    case msg: Connected ⇒
+      log.info(msg.toString)
+      tcpClient ! login.get
+      login = None
+    case (host: String, port: Int, msg: AskLogin)  ⇒ connect(host, port, msg)
     case OpenLobby(username)                       ⇒ openLobby(username)
     case Join(username, roomName)                  ⇒ handleJoined(username, roomName)
     case LeaveChat(username, roomName)             ⇒ handleLeft(username, roomName)

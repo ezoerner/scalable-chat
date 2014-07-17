@@ -21,12 +21,13 @@ import akka.event.Logging
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.util.Try
 import scalable.infrastructure.api.AskLogin
 import scalable.infrastructure.api.ResultStatus._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent
-import scalafx.scene.control.TextField
-import scalafx.scene.layout.GridPane
+import scalafx.scene.control.{ ToggleButton, Button, TextField }
+import scalafx.scene.layout.{ VBox, GridPane }
 import scalafx.scene.text.Text
 import scalafxml.core.macros.sfxml
 
@@ -41,9 +42,16 @@ class LoginController(private val usernameField: TextField,
                       private val failedText: Text,
                       private val timedOutText: Text,
                       private val root: GridPane,
-                      private val actorSystem: ActorSystem) extends LoginResultHandler {
+                      private val actorSystem: ActorSystem,
+                      private val advancedView: VBox,
+                      private val advancedToggle: ToggleButton,
+                      private val hostText: TextField,
+                      private val portText: TextField) extends LoginResultHandler {
   private val log = Logging(actorSystem, this.getClass)
   @volatile private var waiting = true
+
+  hostText.text = Configuration.host
+  portText.text = Configuration.portTcp.toString
 
   def onKeyTyped(): Unit = {
     failedText.visible.value = false
@@ -52,10 +60,12 @@ class LoginController(private val usernameField: TextField,
 
   def login(event: ActionEvent) = {
     timedOutText.visible.value = false
-
-    val tcpClient = tcpClientSelection(actorSystem)
-
-    tcpClient ! AskLogin(usernameField.text.value, passwordField.text.value)
+    val appSupervisor = appSupervisorSelection(actorSystem)
+    appSupervisor !
+      (hostText.text.value,
+        Try(portText.text.value.toInt).getOrElse(Configuration.portTcp),
+        AskLogin(usernameField.text.value,
+          passwordField.text.value))
 
     // start a timer to timeout if no response is received
     actorSystem.scheduler.scheduleOnce(5.seconds) {
@@ -64,6 +74,10 @@ class LoginController(private val usernameField: TextField,
         Platform.runLater(timedOutText.visible.value = true)
       }
     }
+  }
+
+  def toggleAdvanced(event: ActionEvent) = {
+    advancedView.setVisible(advancedToggle.selected.value)
   }
 
   override def loginResult(resultStatus: ResultStatus, username: String) = {

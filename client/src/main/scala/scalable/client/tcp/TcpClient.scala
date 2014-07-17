@@ -16,8 +16,6 @@
 
 package scalable.client.tcp
 
-import java.net.InetSocketAddress
-
 import akka.actor._
 import akka.io.{ IO, Tcp }
 import akka.util.ByteString
@@ -30,27 +28,27 @@ import scalable.infrastructure.api._
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 object TcpClient {
-  def props(remote: InetSocketAddress, systemListener: ActorRef) = Props(new TcpClient(remote, systemListener))
+  def props(systemListener: ActorRef) = Props(new TcpClient(systemListener))
   val path = "tcp"
 }
 
-class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Actor with ActorLogging {
+class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
   import akka.io.Tcp._
   import context.system
 
-  IO(Tcp) ! Connect(remote)
-
   private def handleDataReceived(data: ByteString): Unit = {
-    log.debug("Attempting to deserialize data as SerialiableMessage")
+    log.debug("Attempting to deserialize data as SerializableMessage")
     val msg = SerializableMessage(data)
     log.debug(s"received $msg")
     systemListener ! msg
   }
 
   def receive = {
+    case msg: Connect ⇒
+      IO(Tcp) ! msg
+
     case CommandFailed(_: Connect) ⇒
       systemListener ! "connect failed"
-      context stop self
 
     case c @ Connected(remoteAddress, localAddress) ⇒
       systemListener ! c
@@ -60,10 +58,9 @@ class TcpClient(remote: InetSocketAddress, systemListener: ActorRef) extends Act
         case msg: SerializableMessage ⇒
           log.debug(s"Writing $msg")
           connection ! Write(msg.toByteString)
-        case Received(data) ⇒ {
+        case Received(data) ⇒
           log.debug(s"Received data of class: ${data.getClass.getName}")
           handleDataReceived(data)
-        }
         case CommandFailed(w: Write) ⇒
           // O/S buffer was full
           systemListener ! "write failed"
