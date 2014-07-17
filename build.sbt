@@ -47,7 +47,8 @@ lazy val client = project.dependsOn(server % "test->compile",
 lazy val server = project.dependsOn(infrastructure)
   .settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
-  .settings(libraryDependencies ++= Seq(
+  .settings(fork := true,
+            libraryDependencies ++= Seq(
                   "com.datastax.cassandra" %   "cassandra-driver-core"        % "2.0.2",
                   "com.typesafe.akka"      %% "akka-persistence-experimental" % akkaVersion,
                   "com.typesafe.akka"      %%  "akka-testkit"                 % akkaVersion   % "test"))

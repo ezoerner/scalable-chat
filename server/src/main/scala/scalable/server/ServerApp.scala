@@ -21,7 +21,7 @@ import akka.actor._
 import scala.util.Try
 import scalable.infrastructure.api._
 import scalable.server.chat.ChatRoom
-import scalable.server.tcp.{ClientDisconnected, NewConnection, TcpService}
+import scalable.server.tcp.{ ClientDisconnected, NewConnection, TcpService }
 
 /**
  * Root actor of the server application.

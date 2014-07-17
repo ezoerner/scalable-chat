@@ -19,7 +19,7 @@ package scalable.client.tcp
 import java.net.InetSocketAddress
 
 import akka.actor._
-import akka.io.{IO, Tcp}
+import akka.io.{ IO, Tcp }
 import akka.util.ByteString
 
 import scalable.infrastructure.api._

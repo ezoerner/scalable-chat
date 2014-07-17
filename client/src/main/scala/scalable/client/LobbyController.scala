@@ -17,8 +17,8 @@
 package scalable.client
 
 import java.text.DateFormat
-import java.util.{Date, UUID}
-import javafx.beans.value.{ChangeListener, ObservableValue}
+import java.util.{ Date, UUID }
+import javafx.beans.value.{ ChangeListener, ObservableValue }
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.stage.WindowEvent
@@ -29,7 +29,7 @@ import akka.event.Logging
 import scala.collection.JavaConverters._
 import scala.collection.SortedMap
 import scalable.client.chat.views.Browser
-import scalable.client.chat.{ChatHandler, ChatListener}
+import scalable.client.chat.{ ChatController, ChatHandler, ChatListener }
 import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.Platform

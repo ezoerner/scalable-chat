@@ -18,20 +18,20 @@ package scalable.client
 
 import java.net.InetSocketAddress
 import javafx.scene.Parent
-import javafx.{scene => jfxs}
+import javafx.{ scene ⇒ jfxs }
 
 import akka.actor._
 import akka.io.Tcp.Connected
 
 import scala.reflect.runtime.universe.typeOf
-import scalable.client.chat.ChatHandler
+import scalable.client.chat.{ ChatController, ChatHandler }
 import scalable.client.tcp.TcpClient
 import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.Platform
 import scalafx.scene.Scene
-import scalafxml.core.{DependenciesByType, FXMLLoader}
+import scalafxml.core.{ DependenciesByType, FXMLLoader }
 
 /**
  * Root actor, used for tracking the user's client session information.

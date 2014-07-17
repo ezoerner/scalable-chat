@@ -16,10 +16,11 @@
 
 package scalable.server.chat
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor._
+import akka.persistence._
 import com.datastax.driver.core.utils.UUIDs
 
-import scala.collection.{SortedSet, mutable}
+import scala.collection.SortedSet
 import scalable.infrastructure.api._
 
 /**
@@ -27,63 +28,83 @@ import scalable.infrastructure.api._
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
+
+trait Event
+case class AddParticipant(username: String, connector: ActorRef) extends Event
+case class RemoveParticipant(username: String) extends Event
+case class AddChat(chat: Chat) extends Event
+
+case class ChatRoomState(participants: Map[String, ActorRef] = Map.empty,
+                         messageHistory: SortedSet[Chat] = ChatRoom.newMessageHistory) {
+  def updated(event: Event): ChatRoomState = event match {
+    case AddParticipant(username, connector) ⇒ copy(participants = participants + (username → connector))
+    case RemoveParticipant(username)         ⇒ copy(participants = participants - username)
+    case AddChat(chat)                       ⇒ copy(messageHistory = messageHistory + chat)
+  }
+}
+
 object ChatRoom {
   def props(roomName: String) = Props(new ChatRoom(roomName))
 
   // for now history is only chat messages, may need to expand that later;
-  // ordering by timestamp alone is good enough, if there are multiple messages with the same
-  // timestamp then the ordering between them is non-deterministic
   def newMessageHistory: SortedSet[Chat] = SortedSet[Chat]()(Ordering.by { _.id.get.timestamp })
 }
 
-case class ChatRoomState(participants: Map[String, ActorRef] = Map.empty,
-                         messageHistory: SortedSet[Chat] = ChatRoom.newMessageHistory) {
+class ChatRoom(private val roomName: String) extends PersistentActor with ActorLogging {
 
-}
+  override def persistenceId: String = s"chatroom-$roomName"
 
-class ChatRoom(private val roomName: String) extends /*Persistent*/ Actor with ActorLogging {
-  var participants = Map[String, ActorRef]()
-  val messageHistory = mutable.SortedSet[Chat]()(Ordering.by { _.id.get.timestamp })
+  var state = ChatRoomState()
 
-  //override def persistenceId: String = s"chatroom-$roomName"
-
-  //var state = ChatRoomState()
+  def updateState(event: Event): Unit = state = state.updated(event)
 
   def broadcast(msg: SerializableMessage): Unit =
-    participants.values.foreach(_ ! msg)
+    state.participants.values.foreach(_ ! msg)
 
-  override def receive /*Command*/ : Receive = {
+  override val receiveCommand: Receive = {
 
-    case (Join(username, rmName), connector: ActorRef) ⇒
+    // TODO: Instead of tracking the connector, track the UserSession instead, which will encapsulate
+    // the details of one or multiple connections per user
+    case (msg @ Join(username, rmName), connector: ActorRef) ⇒
       assert(rmName == roomName)
-      val newParticipants = participants + (username → connector)
-      val notAlreadyPresent = newParticipants.size > participants.size
-      participants = newParticipants
-      if (notAlreadyPresent) {
-        broadcast(Join(username, roomName))
-        // send history and participants messages to the joining user
-        connector ! RoomInfo(roomName, messageHistory.toList, participants.keySet.toList.sorted)
+      persist(AddParticipant(username, connector)) { event ⇒
+        val oldState = state
+        updateState(event)
+        val stateChanged = state.participants.size > oldState.participants.size
+        if (stateChanged) {
+          broadcast(msg)
+          // send history and participants messages to the joining user
+          connector ! RoomInfo(roomName, state.messageHistory.toList, state.participants.keySet.toList.sorted)
+        }
       }
 
     case msg @ LeaveChat(username, room) ⇒
       assert(room == roomName, room)
-      val newParticipants = participants - username
-      val notAlreadyAbsent = newParticipants.size < participants.size
-      participants = newParticipants
-      if (notAlreadyAbsent) {
-        broadcast(msg)
+      persist(RemoveParticipant(username)) { event ⇒
+        val oldState = state
+        updateState(event)
+        val stateChanged = state.participants.size < oldState.participants.size
+        if (stateChanged)
+          broadcast(msg)
       }
 
-    case msg @ Chat(id, sender, rmName, htmlText) ⇒
+    case msg @ Chat(id, _, rmName, _) ⇒
       assert(id.isEmpty)
       assert(rmName == roomName)
       val messageId = UUIDs.timeBased
       val chatWithId = msg.copy(id = Some(messageId))
-      messageHistory += chatWithId
-      broadcast(chatWithId)
+      persist(AddChat(chatWithId)) { event ⇒
+        updateState(event)
+        broadcast(chatWithId)
+      }
+
+    case "snap"  ⇒ saveSnapshot(state)
+    case "print" ⇒ println(state)
   }
 
-  //override def receiveRecover: Receive = ???
-
+  override val receiveRecover: Receive = {
+    case evt: Event                                ⇒ updateState(evt)
+    case SnapshotOffer(_, snapshot: ChatRoomState) ⇒ state = snapshot
+  }
 }
 

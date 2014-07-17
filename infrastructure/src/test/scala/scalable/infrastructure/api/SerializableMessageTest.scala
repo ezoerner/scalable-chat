@@ -18,7 +18,7 @@ package scalable.infrastructure.api
 
 import java.util.UUID
 
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.{ Actor, ActorSystem }
 import org.specs2.mutable.Specification
 
 import scalable.infrastructure.api.ResultStatus._

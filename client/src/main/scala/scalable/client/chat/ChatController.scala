@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package scalable.client
+package scalable.client.chat
 
 import scalafx.stage.Stage
 
