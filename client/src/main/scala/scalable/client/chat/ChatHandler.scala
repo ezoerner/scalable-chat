@@ -18,7 +18,7 @@ package scalable.client.chat
 
 import java.util.UUID
 
-import akka.actor.{ Actor, ActorLogging }
+import akka.actor.{Actor, ActorLogging}
 import akka.util.Timeout
 
 import scala.concurrent.duration._
@@ -42,16 +42,22 @@ trait ChatHandler {
   var listeners = Map[String, ChatListener]()
 
   def handleJoined(username: String, roomName: String) =
-    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.joined(username))
+    listeners.get(roomName).fold(noListener(roomName))(_.joined(username))
 
   def handleLeft(username: String, roomName: String) =
-    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.left(username))
+    listeners.get(roomName).fold(noListener(roomName))(_.left(username))
 
   def handleChat(id: UUID, username: String, roomName: String, htmlText: String) =
-    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveChat(id, username, htmlText))
+    listeners.get(roomName).fold(noListener(roomName))(_.receiveChat(id, username, htmlText))
 
   def handleRoomInfo(roomName: String, history: List[Chat], participants: List[String]) =
-    listeners.get(roomName).fold(noListener(roomName))(listener ⇒ listener.receiveRoomInfo(history, participants))
+    listeners.get(roomName).fold(noListener(roomName))(_.receiveRoomInfo(history, participants))
+
+  def handleConnectionReopened() =
+    listeners.values.foreach(_.connectionReopened())
+
+  def handleConnectionClosed() =
+    listeners.values.foreach(_.connectionClosed())
 
   def addChatListener(listener: ChatListener, room: String) = {
     listeners = listeners + (room → listener)
@@ -68,6 +74,8 @@ trait ChatHandler {
 }
 
 trait ChatListener {
+  def connectionReopened(): Unit
+  def connectionClosed(): Unit
   def joined(username: String): Unit
   def left(username: String): Unit
   def receiveChat(id: UUID, sender: String, htmlText: String): Unit

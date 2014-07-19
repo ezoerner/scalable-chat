@@ -59,14 +59,16 @@ class LobbyController(private val onlineTitledPane: TitledPane,
                       private val chatScrollPane: ScrollPane,
                       private val sendOnEnter: CheckBox)
     extends ChatListener with ChatController {
+  private val initialHtml = Browser.getHtml("")
   private val log = Logging(actorSystem, this.getClass)
   private val RoomName = "Lobby"
   private val browser = new Browser("")
-  private val htmlBuilder = new StringBuilder(Browser.getHtml(""))
+  private val htmlBuilder = new StringBuilder(initialHtml)
   private var insertionIndexes = SortedMap[Long, Int]()
-  private var bottomInsertionIndex = Browser.getHtml("").indexOf("</div>")
+  private var bottomInsertionIndex = initialHtml.indexOf("</div>")
   private val dateFormat = DateFormat.getDateInstance
   private val timeFormat = DateFormat.getTimeInstance
+  private var active = true
 
   override def setStageAndSetupListeners(stage: Stage): Unit = {
 
@@ -132,6 +134,17 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     receiveParticipants(participants)
   }
 
+  override def connectionReopened(): Unit = {
+    log.info("Reopened connection to server")
+    resetChat()
+    chatHandler.join(username, RoomName)
+  }
+  // TODO: Deactivate the chat while connection is closed and then reactivate after new RoomInfo is received
+
+  override def connectionClosed(): Unit = {
+    log.error("Unable to reconnect to server, close application and try again later")
+  }
+
   private def receiveParticipants(participants: List[String]): Unit =
     Platform.runLater {
       log.debug(s"received participants=$participants")
@@ -141,6 +154,17 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       onlineListView.items.get().sort()
       ()
     }
+
+  private def resetChat() = {
+    htmlBuilder.clear()
+    htmlBuilder.append(initialHtml)
+    insertionIndexes = SortedMap[Long, Int]()
+    bottomInsertionIndex = initialHtml.indexOf("</div>")
+    Platform.runLater {
+      updateBrowser()
+      onlineListView.getItems.clear()
+    }
+  }
 
   private def updateBrowser() = {
     browser.setContent(htmlBuilder.mkString)
@@ -183,7 +207,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       val indexDisplacement = stringToInsert.length
       if (insertionIndexes.lastOption.fold(true) { case (t, i) ⇒ timestamp >= t }) {
         val index = bottomInsertionIndex
-        bottomInsertionIndex = index + indexDisplacement
+        bottomInsertionIndex = bottomInsertionIndex + indexDisplacement
         insertionIndexes = insertionIndexes + (timestamp → index)
         index
       }
@@ -191,7 +215,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
         val pivotIndex = (insertionIndexes to timestamp).size
         val (beforeMap, afterMap) = insertionIndexes.splitAt(pivotIndex)
         assert(!afterMap.isEmpty)
-        val insertionIndexIntoWeb = afterMap(0)
+        val insertionIndexIntoWeb = afterMap.head._2
         val updatedAfterMap = afterMap.map { case (k, v) ⇒ k → (v + indexDisplacement) }
         insertionIndexes = (beforeMap + (timestamp → insertionIndexIntoWeb)) ++ updatedAfterMap
         insertionIndexIntoWeb

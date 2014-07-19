@@ -67,26 +67,24 @@ class ChatRoom(private val roomName: String) extends PersistentActor with ActorL
     // the details of one or multiple connections per user
     case (msg @ Join(username, rmName), connector: ActorRef) ⇒
       assert(rmName == roomName)
-      persist(AddParticipant(username, connector)) { event ⇒
-        val oldState = state
-        updateState(event)
-        val stateChanged = state.participants.size > oldState.participants.size
-        if (stateChanged) {
-          broadcast(msg)
-          // send history and participants messages to the joining user
-          connector ! RoomInfo(roomName, state.messageHistory.toList, state.participants.keySet.toList.sorted)
-        }
+      val event = AddParticipant(username, connector)
+      val oldState = state
+      updateState(event)
+      val stateChanged = state.participants.size > oldState.participants.size
+      if (stateChanged) {
+        broadcast(msg)
+        // send history and participants messages to the joining user
+        connector ! RoomInfo(roomName, state.messageHistory.toList, state.participants.keySet.toList.sorted)
       }
 
     case msg @ LeaveChat(username, room) ⇒
       assert(room == roomName, room)
-      persist(RemoveParticipant(username)) { event ⇒
-        val oldState = state
-        updateState(event)
-        val stateChanged = state.participants.size < oldState.participants.size
-        if (stateChanged)
-          broadcast(msg)
-      }
+      val event = RemoveParticipant(username)
+      val oldState = state
+      updateState(event)
+      val stateChanged = state.participants.size < oldState.participants.size
+      if (stateChanged)
+        broadcast(msg)
 
     case msg @ Chat(id, _, rmName, _) ⇒
       assert(id.isEmpty)

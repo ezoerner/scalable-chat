@@ -18,20 +18,20 @@ package scalable.client
 
 import java.net.InetSocketAddress
 import javafx.scene.Parent
-import javafx.{ scene ⇒ jfxs }
+import javafx.{scene => jfxs}
 
 import akka.actor._
-import akka.io.Tcp.{ Connect, Connected }
+import akka.io.Tcp.{Connect, Connected, ConnectionClosed}
 
 import scala.reflect.runtime.universe.typeOf
-import scalable.client.chat.{ ChatController, ChatHandler }
+import scalable.client.chat.{ChatController, ChatHandler}
 import scalable.client.tcp.TcpClient
 import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.Platform
 import scalafx.scene.Scene
-import scalafxml.core.{ DependenciesByType, FXMLLoader }
+import scalafxml.core.{DependenciesByType, FXMLLoader}
 
 /**
  * Root actor, used for tracking the user's client session information.
@@ -43,7 +43,7 @@ object ClientApp {
   def props(loginResultHandler: LoginResultHandler) = Props(new ClientApp(loginResultHandler))
 }
 
-class ClientApp(private val loginResultHandler: LoginResultHandler) extends Actor with ActorLogging with ChatHandler {
+class ClientApp(private var loginResultHandler: LoginResultHandler) extends Actor with ActorLogging with ChatHandler {
   require(loginResultHandler != null)
   log.debug(s"ClientAppSupervisor path=${self.path.toStringWithoutAddress}")
 
@@ -57,6 +57,9 @@ class ClientApp(private val loginResultHandler: LoginResultHandler) extends Acto
   }
 
   def openLobby(username: String): Unit = Platform.runLater {
+    // finished with loginResultHandler; todo refactor see #22
+    loginResultHandler = null
+
     val loader: FXMLLoader = new FXMLLoader(getClass.getResource("Lobby.fxml"),
       new DependenciesByType(Map(typeOf[String] → username,
         typeOf[ActorSystem] → context.system,
@@ -78,15 +81,19 @@ class ClientApp(private val loginResultHandler: LoginResultHandler) extends Acto
     case msg: Connected ⇒
       log.info(msg.toString)
       tcpClient ! login.get
-      login = None
     case (host: String, port: Int, msg: AskLogin)  ⇒ connect(host, port, msg)
     case OpenLobby(username)                       ⇒ openLobby(username)
     case Join(username, roomName)                  ⇒ handleJoined(username, roomName)
     case LeaveChat(username, roomName)             ⇒ handleLeft(username, roomName)
     case Chat(id, username, roomName, htmlText)    ⇒ handleChat(id.get, username, roomName, htmlText)
     case RoomInfo(roomName, history, participants) ⇒ handleRoomInfo(roomName, history, participants)
-    case LoginResult(resultStatus, username)       ⇒ loginResultHandler.loginResult(resultStatus, username)
-    case msg                                       ⇒ log.info(s"Supervisor received: $msg")
+    case LoginResult(resultStatus, username) ⇒
+      handleConnectionReopened()
+      if (loginResultHandler != null)
+        loginResultHandler.loginResult(resultStatus, username)
+    case msg: ConnectionClosed ⇒
+      handleConnectionClosed()
+    case msg ⇒ log.info(s"ClientApp received: $msg")
   }
 }
 
