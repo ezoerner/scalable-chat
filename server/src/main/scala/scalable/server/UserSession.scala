@@ -17,8 +17,9 @@
 package scalable.server
 
 import akka.actor._
-import scalable.infrastructure.api.{ AskLogin, LoginResult }
+
 import scalable.infrastructure.api.ResultStatus._
+import scalable.infrastructure.api.{AskLogin, LoginResult}
 
 /**
  * State for a registered user (whether currently online or not).
@@ -29,7 +30,7 @@ object UserSession {
   def props(login: AskLogin, connector: ActorRef) =
     Props(new UserSession(login.username, login.password, connector))
 
-  def userSessionName(username: String) = s"user:$username"
+  def userSessionName(username: String) = s"user-$username"
 }
 
 class UserSession(val username: String, val password: String, var tcpConnector: ActorRef)
