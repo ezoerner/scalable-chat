@@ -17,8 +17,8 @@
 package scalable.client
 
 import java.text.DateFormat
-import java.util.{ Date, UUID }
-import javafx.beans.value.{ ChangeListener, ObservableValue }
+import java.util.{Date, UUID}
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.stage.WindowEvent
@@ -29,7 +29,7 @@ import akka.event.Logging
 import scala.collection.JavaConverters._
 import scala.collection.SortedMap
 import scalable.client.chat.views.Browser
-import scalable.client.chat.{ ChatController, ChatHandler, ChatListener }
+import scalable.client.chat.{ChatController, ChatHandler, ChatListener}
 import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.Platform
@@ -56,7 +56,8 @@ class LobbyController(private val onlineTitledPane: TitledPane,
                       private val chatEditor: HTMLEditor,
                       private val sendChat: Button,
                       private val webViewParent: AnchorPane,
-                      private val chatScrollPane: ScrollPane)
+                      private val chatScrollPane: ScrollPane,
+                      private val sendOnEnter: CheckBox)
     extends ChatListener with ChatController {
   private val log = Logging(actorSystem, this.getClass)
   private val RoomName = "Lobby"
@@ -68,6 +69,9 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private val timeFormat = DateFormat.getTimeInstance
 
   override def setStageAndSetupListeners(stage: Stage): Unit = {
+
+    sendChat.defaultButton <==> sendOnEnter.selected
+
     usernameText.text = username
     assert(onlineTitledPane != null)
     accordion.expandedPane = onlineTitledPane
@@ -87,6 +91,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     Platform.runLater {
       chatHandler.addChatListener(this, RoomName)
       chatHandler.join(username, RoomName)
+      chatEditor.requestFocus()
     }
 
     stage.setOnCloseRequest(new EventHandler[WindowEvent]() {
@@ -151,8 +156,14 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     }
 
     val html = extractNewContent(chatEditor.htmlText)
-    log.debug(s"Send: $html")
-    chatHandler.sendChat(RoomName, username, html)
+    if (!html.isEmpty) {
+      log.debug(s"Send: $html")
+      chatHandler.sendChat(RoomName, username, html)
+      chatEditor.htmlText = ""
+    }
+    Platform.runLater {
+      chatEditor.requestFocus()
+    }
   }
 
   private val headerFontStyle = s"""size="1" face="Courier" color="#1a3399""""
