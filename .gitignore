@@ -19,5 +19,10 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 
+# akka persistence
 server/snapshots/
 server/journal/
+
+# JavaFX packaging
+/classes/
+

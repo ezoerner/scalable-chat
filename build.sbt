@@ -21,11 +21,12 @@ lazy val commonSettings = scalariformSettings ++ resolverSettings ++
                                 .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, false)
                                 .setPreference(MultilineScaladocCommentsStartOnFirstLine, false))
 
-lazy val resolverSettings = Seq(resolvers ++= Seq())
+lazy val resolverSettings = Seq(resolvers ++= Seq("krasserm at bintray" at "http://dl.bintray.com/krasserm/maven"))
 
 lazy val commonSubmoduleDependencies = libraryDependencies ++= Seq(
                   "org.specs2"            %%  "specs2"                  % "2.3.12" % "test",
-                  "com.typesafe.akka"     %%  "akka-actor"              % akkaVersion)
+                  "com.typesafe.akka"     %%  "akka-actor"              % akkaVersion,
+                  "ch.qos.logback"        %   "logback-classic"         % "1.1.2")
 
 lazy val infrastructure = project.settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
@@ -49,8 +50,9 @@ lazy val server = project.dependsOn(infrastructure)
   .settings(commonSubmoduleDependencies)
   .settings(fork := true,
             libraryDependencies ++= Seq(
-                  "com.datastax.cassandra" %   "cassandra-driver-core"        % "2.0.2",
+                  "com.datastax.cassandra" %   "cassandra-driver-core"        % "2.0.3",
                   "com.typesafe.akka"      %% "akka-persistence-experimental" % akkaVersion,
+                  "com.github.krasserm"    %% "akka-persistence-cassandra"    % "0.3.2",
                   "com.typesafe.akka"      %%  "akka-testkit"                 % akkaVersion   % "test"))
 
 lazy val scalable =
