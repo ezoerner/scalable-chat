@@ -17,7 +17,7 @@
 package scalable.client.tcp
 
 import akka.actor._
-import akka.io.{IO, Tcp}
+import akka.io.{ IO, Tcp }
 import akka.util.ByteString
 
 import scala.concurrent.duration._
@@ -36,7 +36,7 @@ object TcpClient {
 
 class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
   import akka.io.Tcp._
-  import context.{dispatcher, system}
+  import context.{ dispatcher, system }
 
   private var connectMsg: Option[Connect] = None
   private var retryCount = 0

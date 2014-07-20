@@ -19,7 +19,7 @@ package scalable.server
 import akka.actor._
 
 import scalable.infrastructure.api.ResultStatus._
-import scalable.infrastructure.api.{AskLogin, LoginResult}
+import scalable.infrastructure.api.{ AskLogin, LoginResult }
 
 /**
  * State for a registered user (whether currently online or not).
