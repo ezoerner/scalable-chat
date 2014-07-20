@@ -22,6 +22,7 @@ import akka.event.Logging
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.util.Try
+import scalable.client.login.LoginListener
 import scalable.infrastructure.api.AskLogin
 import scalable.infrastructure.api.ResultStatus._
 import scalafx.application.Platform
@@ -46,7 +47,7 @@ class LoginController(private val usernameField: TextField,
                       private val advancedView: VBox,
                       private val advancedToggle: ToggleButton,
                       private val hostText: TextField,
-                      private val portText: TextField) extends LoginResultHandler {
+                      private val portText: TextField) extends LoginListener {
   private val log = Logging(actorSystem, this.getClass)
   @volatile private var waiting = true
 

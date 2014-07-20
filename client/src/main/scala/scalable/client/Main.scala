@@ -24,6 +24,7 @@ import com.typesafe.config.ConfigFactory
 
 import scala.reflect.runtime.universe.typeOf
 import scala.util.control.NonFatal
+import scalable.client.login.LoginListener
 import scalable.infrastructure.api.ResultStatus._
 import scalafx.Includes._
 import scalafx.application.JFXApp
@@ -44,8 +45,8 @@ class Main extends JFXApp {
 
   val loader: FXMLLoader = new FXMLLoader(getClass.getResource("Login.fxml"), dependencies)
   val root: Parent = loader.load()
-  val loginResultHandler: LoginResultHandler = loader.getController()
-  require(loginResultHandler != null)
+  val loginListener: LoginListener = loader.getController()
+  require(loginListener != null)
 
   stage = new PrimaryStage() {
     title = "Login / Register"
@@ -53,7 +54,7 @@ class Main extends JFXApp {
   }
 
   val rootActor = try {
-    actorSystem.actorOf(ClientApp.props(loginResultHandler), ClientApp.path)
+    actorSystem.actorOf(ClientApp.props(loginListener), ClientApp.path)
   }
   catch {
     case NonFatal(e) ⇒
@@ -65,10 +66,6 @@ class Main extends JFXApp {
   override def stopApp() = {
     rootActor ! PoisonPill
   }
-}
-
-trait LoginResultHandler {
-  def loginResult(resultStatus: ResultStatus, username: String): Unit
 }
 
 object Configuration {

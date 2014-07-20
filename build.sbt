@@ -42,7 +42,7 @@ lazy val client = project.dependsOn(server % "test->compile",
             addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0" cross CrossVersion.full))
   .settings(commonSubmoduleDependencies)
   .settings(libraryDependencies ++= Seq(
-                  "org.scalafx"         %%  "scalafx"            % "8.0.0-R4",
+                  "org.scalafx"         %%  "scalafx"            % "8.0.5-R5",
                   "org.scalafx"         %%  "scalafxml-core"     % "0.2.1-SNAPSHOT"))
 
 lazy val server = project.dependsOn(infrastructure)

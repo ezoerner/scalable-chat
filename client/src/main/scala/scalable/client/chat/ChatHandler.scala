@@ -26,7 +26,7 @@ import scalable.client._
 import scalable.infrastructure.api._
 
 /**
- * Actor to handle client-side chat events for all chat rooms.
+ * Actor trait to handle client-side chat events for all chat rooms.
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
@@ -39,7 +39,7 @@ trait ChatHandler {
 
   def noListener(roomName: String) = log.error(s"Could not find chat room $roomName")
 
-  var listeners = Map[String, ChatListener]()
+  private var listeners = Map[String, ChatListener]()
 
   def handleJoined(username: String, roomName: String) =
     listeners.get(roomName).fold(noListener(roomName))(_.joined(username))
@@ -52,9 +52,6 @@ trait ChatHandler {
 
   def handleRoomInfo(roomName: String, history: List[Chat], participants: List[String]) =
     listeners.get(roomName).fold(noListener(roomName))(_.receiveRoomInfo(history, participants))
-
-  def handleConnectionReopened() =
-    listeners.values.foreach(_.connectionReopened())
 
   def handleConnectionClosed() =
     listeners.values.foreach(_.connectionClosed())
@@ -74,7 +71,6 @@ trait ChatHandler {
 }
 
 trait ChatListener {
-  def connectionReopened(): Unit
   def connectionClosed(): Unit
   def joined(username: String): Unit
   def left(username: String): Unit

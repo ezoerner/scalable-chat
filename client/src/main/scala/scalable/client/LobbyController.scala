@@ -30,6 +30,8 @@ import scala.collection.JavaConverters._
 import scala.collection.SortedMap
 import scalable.client.chat.views.Browser
 import scalable.client.chat.{ ChatController, ChatHandler, ChatListener }
+import scalable.client.login.{ LoginHandler, LoginListener }
+import scalable.infrastructure.api.ResultStatus.ResultStatus
 import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.Platform
@@ -50,6 +52,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
                       private val accordion: Accordion,
                       private val actorSystem: ActorSystem,
                       private val chatHandler: ChatHandler,
+                      private val loginHandler: LoginHandler,
                       private val usernameText: Text,
                       private val username: String,
                       private val onlineListView: ListView[String],
@@ -58,7 +61,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
                       private val webViewParent: AnchorPane,
                       private val chatScrollPane: ScrollPane,
                       private val sendOnEnter: CheckBox)
-    extends ChatListener with ChatController {
+    extends ChatListener with LoginListener with ChatController {
   private val initialHtml = Browser.getHtml("")
   private val log = Logging(actorSystem, this.getClass)
   private val RoomName = "Lobby"
@@ -68,7 +71,6 @@ class LobbyController(private val onlineTitledPane: TitledPane,
   private var bottomInsertionIndex = initialHtml.indexOf("</div>")
   private val dateFormat = DateFormat.getDateInstance
   private val timeFormat = DateFormat.getTimeInstance
-  private var active = true
 
   override def setStageAndSetupListeners(stage: Stage): Unit = {
 
@@ -90,8 +92,10 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       }
     })
 
+    chatHandler.addChatListener(this, RoomName)
+    loginHandler.addListener(this)
+
     Platform.runLater {
-      chatHandler.addChatListener(this, RoomName)
       chatHandler.join(username, RoomName)
       chatEditor.requestFocus()
     }
@@ -134,12 +138,15 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     receiveParticipants(participants)
   }
 
-  override def connectionReopened(): Unit = {
-    log.info("Reopened connection to server")
-    resetChat()
-    chatHandler.join(username, RoomName)
-  }
   // TODO: Deactivate the chat while connection is closed and then reactivate after new RoomInfo is received
+  override def loginResult(resultStatus: ResultStatus, user: String): Unit = {
+    if (resultStatus == ResultStatus.Ok) {
+      assert(user == username)
+      log.info("Reopened connection to server")
+      resetChat()
+      chatHandler.join(username, RoomName)
+    }
+  }
 
   override def connectionClosed(): Unit = {
     log.error("Unable to reconnect to server, close application and try again later")
