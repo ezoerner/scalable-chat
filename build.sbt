@@ -30,8 +30,6 @@ lazy val commonSubmoduleDependencies = libraryDependencies ++= Seq(
 
 lazy val infrastructure = project.settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
-  .settings(libraryDependencies ++= Seq(
-                  "com.datastax.cassandra" %  "cassandra-driver-core"   % "2.0.2"))
 
 // Fork a new JVM for 'run' and 'test:run', to avoid JavaFX double initialization problems
 lazy val client = project.dependsOn(server % "test->compile",
