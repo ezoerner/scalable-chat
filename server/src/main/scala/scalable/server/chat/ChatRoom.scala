@@ -46,7 +46,6 @@ case class ChatRoomState(participants: Map[String, ActorRef] = Map.empty,
 object ChatRoom {
   def props(roomName: String) = Props(new ChatRoom(roomName))
 
-  // for now history is only chat messages, may need to expand that later;
   def newMessageHistory: SortedSet[Chat] = SortedSet[Chat]()(Ordering.by { _.id.get.timestamp })
 }
 
@@ -63,8 +62,6 @@ class ChatRoom(private val roomName: String) extends PersistentActor with ActorL
 
   override val receiveCommand: Receive = {
 
-    // TODO: Instead of tracking the connector, track the UserSession instead, which will encapsulate
-    // the details of one or multiple connections per user
     case (msg @ Join(username, rmName), connector: ActorRef) ⇒
       assert(rmName == roomName)
       val event = AddParticipant(username, connector)
