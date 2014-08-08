@@ -36,10 +36,7 @@ class TcpServer(private val connection: ActorRef, private val listener: ActorRef
   override def receive = {
     case Received(byteString) ⇒
       val message = SerializableMessage(byteString)
-      log.debug("Received " + (message match {
-        case _: RoomInfo ⇒ "RoomInfo(...)"
-        case m           ⇒ m.toString
-      }))
+      log.debug(s"Received $message")
       listener ! message
     case PeerClosed ⇒
       trackedUser.fold(())(username ⇒ listener ! ClientDisconnected(username))
@@ -54,12 +51,19 @@ class TcpServer(private val connection: ActorRef, private val listener: ActorRef
       log.debug(s"Writing $msg to connection")
       connection ! Write(msg.toByteString)
     case msg: SerializableMessage ⇒
-      log.debug(s"Writing $msg to connection for $trackedUser")
+      if (log.isDebugEnabled) logWrite(msg, trackedUser)
       connection ! Write(msg.toByteString)
   }
 
   private def stop(): Unit = {
     context stop self
+  }
+
+  def logWrite(msg: SerializableMessage, user: Option[String]): Unit = {
+    log.debug(s"Writing " + (msg match {
+      case _: RoomInfo ⇒ "RoomInfo(...)"
+      case m           ⇒ m.toString
+    }) + " to connection for user")
   }
 }
 
