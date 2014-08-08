@@ -53,7 +53,7 @@ class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
   private def handleDataReceived(data: ByteString): Unit = {
     log.debug("Attempting to deserialize data as SerializableMessage")
     val msg = SerializableMessage(data)
-    log.debug("received " + (msg match {
+    log.debug("Received " + (msg match {
       case _: RoomInfo ⇒ "RoomInfo(...)"
       case m           ⇒ m.toString
     }))
@@ -97,34 +97,4 @@ class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
           log.error(s"Unexpected message received: $msg")
       }
   }
-
-  /*
-  private def reconnect(): Future[Boolean] = {
-    implicit val timeout = Timeout(1.second)
-    connectMsg.fold(Future.successful(false))(_ ⇒ reconnectWithRetries)
-  }
-
-  private def reconnectWithRetries(implicit timeout: Timeout): Future[Boolean] = {
-    Retry.retry[Boolean](maxRetry = 20, deadline = Some(5.minutes.fromNow)) {
-      Await.result(attemptConnect(), timeout.duration)
-    }.recoverWith(recoverBlock)
-  }
-
-  private def attemptConnect()(implicit timeout: Timeout): Future[Boolean] = {
-    log.error("Trying to connect...")
-    (IO(Tcp) ? connectMsg.get).map(resultMsgToBoolean)
-  }
-
-  private def resultMsgToBoolean(msg: Any): Boolean = msg match {
-    case Connected(_, _)           ⇒ true
-    case CommandFailed(_: Connect) ⇒ sys.error("Failed to connect")
-    case obj                       ⇒ sys.error(s"Received $obj when trying to reconnect")
-  }
-
-  private def recoverBlock: PartialFunction[Throwable, Future[Boolean]] = {
-    case e ⇒
-      log.error(e, "while attempting reconnect with retries and exponential back off")
-      Future.successful(false)
-  }
-*/
 }

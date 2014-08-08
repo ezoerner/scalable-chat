@@ -36,7 +36,10 @@ class TcpServer(private val connection: ActorRef, private val listener: ActorRef
   override def receive = {
     case Received(byteString) ⇒
       val message = SerializableMessage(byteString)
-      log.debug(s"Received $message")
+      log.debug("Received " + (message match {
+        case _: RoomInfo ⇒ "RoomInfo(...)"
+        case m           ⇒ m.toString
+      }))
       listener ! message
     case PeerClosed ⇒
       trackedUser.fold(())(username ⇒ listener ! ClientDisconnected(username))
