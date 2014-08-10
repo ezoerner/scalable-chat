@@ -1,4 +1,4 @@
-# Scalable App #
+# Scalable Chat #
 
 ### What is this repository for? ###
 
