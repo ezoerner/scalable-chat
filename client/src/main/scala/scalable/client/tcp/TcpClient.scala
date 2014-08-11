@@ -23,6 +23,7 @@ import akka.util.ByteString
 import scala.concurrent.duration._
 import scala.util.Random
 import scalable.infrastructure.api._
+import scalable.infrastructure.tcp.SimpleBuffer
 
 /**
  * Tcp Client.
@@ -38,6 +39,7 @@ class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
   import akka.io.Tcp._
   import context.{ dispatcher, system }
 
+  private val simpleBuffer = new SimpleBuffer
   private var connectMsg: Option[Connect] = None
   private var retryCount = 0
   private def resetRetryCount() = retryCount = 0
@@ -52,12 +54,14 @@ class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
 
   private def handleDataReceived(data: ByteString): Unit = {
     log.debug(s"Attempting to deserialize data as SerializableMessage from ByteString length ${data.size}")
-    val msg = SerializableMessage(data)
-    log.debug("Received " + (msg match {
-      case _: RoomInfo ⇒ "RoomInfo(...)"
-      case m           ⇒ m.toString
-    }))
-    systemListener ! msg
+    simpleBuffer.nextMessageBytes(data).foreach { bytes ⇒
+      val msg = SerializableMessage(bytes)
+      log.debug("Received " + (msg match {
+        case _: RoomInfo ⇒ "RoomInfo(...)"
+        case m           ⇒ m.toString
+      }))
+      systemListener ! msg
+    }
   }
 
   def receive = {
@@ -76,7 +80,7 @@ class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
       context become {
         case msg: SerializableMessage ⇒
           log.debug(s"Writing $msg")
-          connection ! Write(msg.toByteString)
+          connection ! Write(simpleBuffer.serializableMessageWithLength(msg))
         case Received(data) ⇒
           log.debug(s"Received data of class: ${data.getClass.getName}")
           handleDataReceived(data)

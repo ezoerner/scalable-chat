@@ -19,6 +19,7 @@ package scalable.infrastructure.api
 import java.util.UUID
 
 import akka.actor.{ Actor, ActorSystem }
+import akka.util.ByteString
 import org.specs2.mutable.Specification
 
 import scalable.infrastructure.api.ResultStatus._
@@ -55,7 +56,7 @@ class SerializableMessageTest extends Specification {
       implicit lazy val actorSystem = ActorSystem("Main")
       try {
         true === testMessages(actorSystem).forall { msg ⇒
-          val bytes = msg.toByteString
+          val bytes = ByteString(msg.toByteArray)
           val newMsg = SerializableMessage(bytes)
           newMsg === msg
           true

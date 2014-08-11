@@ -42,6 +42,7 @@ abstract class TcpClientAndServer extends AkkaTestkitSpecs2Support {
         server = conn
         ()
     }
+    assert(server != null)
     (client, server)
   }
 }
@@ -52,9 +53,9 @@ class TcpTest extends Specification with NoTimeConversions {
   "TCP connection" should {
     "transfer a Login message from client to server" in new TcpClientAndServer {
       within(5.second) {
-        val (tcpClient, _) = clientAndServer
+        val (tcpClient, server) = clientAndServer
         val msg = AskLogin("user", "password")
-        tcpClient ! msg.toByteString
+        tcpClient ! msg
         expectMsgType[AskLogin] must be equalTo msg
       }
     }

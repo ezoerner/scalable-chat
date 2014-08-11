@@ -38,11 +38,11 @@ object SerializableMessage {
 }
 
 sealed trait SerializableMessage extends Serializable {
-  def toByteString(implicit system: ActorSystem): ByteString = {
+  def toByteArray(implicit system: ActorSystem): Array[Byte] = {
     val serialization = SerializationExtension(system)
-    ByteString(serialization.serialize(this)
+    serialization.serialize(this)
       .recover { case e ⇒ throw e }
-      .get)
+      .get
   }
 }
 

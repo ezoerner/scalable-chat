@@ -17,9 +17,10 @@
 package scalable.server.tcp
 
 import akka.actor._
-import akka.util.ByteString
+import akka.util.{ ByteStringBuilder, ByteString }
 
 import scalable.infrastructure.api._
+import scalable.infrastructure.tcp.SimpleBuffer
 
 object TcpServer {
   def props(connection: ActorRef, listener: ActorRef) = Props(new TcpServer(connection, listener))
@@ -27,8 +28,10 @@ object TcpServer {
 
 class TcpServer(private val connection: ActorRef, private val listener: ActorRef)
     extends Actor with ActorLogging {
-  var trackedUser: Option[String] = None
+  private var trackedUser: Option[String] = None
   implicit val system = context.system
+
+  private val simpleBuffer = new SimpleBuffer
 
   import akka.io.Tcp._
 
@@ -36,9 +39,11 @@ class TcpServer(private val connection: ActorRef, private val listener: ActorRef
 
   override def receive = {
     case Received(byteString) ⇒
-      val message = SerializableMessage(byteString)
-      log.debug(s"Received $message")
-      listener ! message
+      simpleBuffer.nextMessageBytes(byteString).foreach { bytes ⇒
+        val message = SerializableMessage(bytes)
+        log.debug(s"Received $message")
+        listener ! message
+      }
     case PeerClosed ⇒
       trackedUser.fold(())(username ⇒ listener ! ClientDisconnected(username))
       stop()
@@ -50,11 +55,11 @@ class TcpServer(private val connection: ActorRef, private val listener: ActorRef
     case msg @ LoginResult(resultStatus, username) if resultStatus == ResultStatus.Ok ⇒
       trackedUser = Some(username)
       log.debug(s"Writing $msg to connection")
-      connection ! Write(msg.toByteString)
+      connection ! Write(simpleBuffer.serializableMessageWithLength(msg))
     case msg: SerializableMessage ⇒
-      val bytes = msg.toByteString
-      if (log.isDebugEnabled) logWrite(msg, trackedUser, bytes)
-      connection ! Write(bytes)
+      val bytesWithLength = simpleBuffer.serializableMessageWithLength(msg)
+      if (log.isDebugEnabled) logWrite(msg, trackedUser, bytesWithLength)
+      connection ! Write(bytesWithLength)
   }
 
   private def stop(): Unit = {

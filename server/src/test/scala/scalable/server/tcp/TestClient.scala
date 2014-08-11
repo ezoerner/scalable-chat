@@ -20,8 +20,9 @@ import java.net.InetSocketAddress
 
 import akka.actor.{ Actor, ActorRef, Props }
 import akka.io.{ IO, Tcp }
-import akka.util.ByteString
+
 import scalable.infrastructure.api.SerializableMessage
+import scalable.infrastructure.tcp.SimpleBuffer
 
 /**
  * Test tcp client.
@@ -38,6 +39,8 @@ class TestClient(remote: InetSocketAddress, listener: ActorRef) extends Actor {
   import akka.io.Tcp._
   import context.system
 
+  private val simpleBuffer = new SimpleBuffer
+
   IO(Tcp) ! Connect(remote)
 
   def receive = {
@@ -53,14 +56,16 @@ class TestClient(remote: InetSocketAddress, listener: ActorRef) extends Actor {
       val connection = sender()
       connection ! Register(self)
       context become {
-        case data: ByteString ⇒
-          connection ! Write(data)
+        case msg: SerializableMessage ⇒
+          connection ! Write(simpleBuffer.serializableMessageWithLength(msg))
         case CommandFailed(w: Write) ⇒
           // O/S buffer was full
           listener ! "write failed"
         case Received(data) ⇒
-          val message = SerializableMessage(data)
-          listener ! message
+          simpleBuffer.nextMessageBytes(data).foreach { bytes ⇒
+            val message = SerializableMessage(bytes)
+            listener ! message
+          }
         case "close" ⇒
           connection ! Close
         case _: ConnectionClosed ⇒
@@ -68,8 +73,4 @@ class TestClient(remote: InetSocketAddress, listener: ActorRef) extends Actor {
           context stop self
       }
   }
-}
-
-trait TcpListener {
-
 }
