@@ -51,7 +51,7 @@ class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
   }
 
   private def handleDataReceived(data: ByteString): Unit = {
-    log.debug("Attempting to deserialize data as SerializableMessage")
+    log.debug(s"Attempting to deserialize data as SerializableMessage from ByteString length ${data.size}")
     val msg = SerializableMessage(data)
     log.debug("Received " + (msg match {
       case _: RoomInfo ⇒ "RoomInfo(...)"
