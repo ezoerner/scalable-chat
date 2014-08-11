@@ -17,6 +17,7 @@
 package scalable.server.tcp
 
 import akka.actor._
+import akka.util.ByteString
 
 import scalable.infrastructure.api._
 
@@ -51,19 +52,20 @@ class TcpServer(private val connection: ActorRef, private val listener: ActorRef
       log.debug(s"Writing $msg to connection")
       connection ! Write(msg.toByteString)
     case msg: SerializableMessage ⇒
-      if (log.isDebugEnabled) logWrite(msg, trackedUser)
-      connection ! Write(msg.toByteString)
+      val bytes = msg.toByteString
+      if (log.isDebugEnabled) logWrite(msg, trackedUser, bytes)
+      connection ! Write(bytes)
   }
 
   private def stop(): Unit = {
     context stop self
   }
 
-  def logWrite(msg: SerializableMessage, user: Option[String]): Unit = {
-    log.debug(s"Writing " + (msg match {
+  def logWrite(msg: SerializableMessage, user: Option[String], bytes: ByteString): Unit = {
+    log.debug("Writing " + (msg match {
       case _: RoomInfo ⇒ "RoomInfo(...)"
       case m           ⇒ m.toString
-    }) + " to connection for user")
+    }) + s" as ByteString of length ${bytes.size} to connection for user $user")
   }
 }
 
