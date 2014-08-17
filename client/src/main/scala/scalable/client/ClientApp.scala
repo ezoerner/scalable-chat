@@ -18,21 +18,21 @@ package scalable.client
 
 import java.net.InetSocketAddress
 import javafx.scene.Parent
-import javafx.{scene => jfxs}
+import javafx.{ scene ⇒ jfxs }
 
 import akka.actor._
-import akka.io.Tcp.{Connect, Connected, ConnectionClosed}
+import akka.io.Tcp.{ Connect, Connected, ConnectionClosed }
 
 import scala.reflect.runtime.universe.typeOf
-import scalable.client.chat.{ChatController, ChatHandler}
-import scalable.client.login.{LoginHandler, LoginListener}
+import scalable.client.chat.{ ChatController, ChatHandler }
+import scalable.client.login.{ LoginHandler, LoginListener }
 import scalable.client.tcp.TcpClient
 import scalable.infrastructure.api._
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.scene.Scene
 import scalafx.stage.Stage
-import scalafxml.core.{DependenciesByType, FXMLLoader}
+import scalafxml.core.{ DependenciesByType, FXMLLoader }
 
 /**
  * Root actor, used for tracking the user's client session information.
@@ -81,13 +81,8 @@ class ClientApp(loginListener: LoginListener)
     case msg: Connected ⇒
       log.info(msg.toString)
       tcpClient ! login.get
-    case (host: String, port: Int, msg: AskLogin) ⇒ connect(host, port, msg)
-    case OpenLobby(username) ⇒
-      openLobby(username)
-      Platform.runLater {
-
-      }
-
+    case (host: String, port: Int, msg: AskLogin)  ⇒ connect(host, port, msg)
+    case OpenLobby(username)                       ⇒ openLobby(username)
     case Join(username, roomName)                  ⇒ handleJoined(username, roomName)
     case LeaveChat(username, roomName)             ⇒ handleLeft(username, roomName)
     case Chat(id, username, roomName, htmlText)    ⇒ handleChat(id.get, username, roomName, htmlText)

@@ -72,6 +72,7 @@ package object client {
         case node :: _ if node.getClass.isAssignableFrom(clazz) ⇒ Some(node.asInstanceOf[T])
         case (node: javafx.scene.Parent) :: rest ⇒ seqLookup(node.getChildrenUnmodifiable.toList ::: rest)
         case _ :: rest ⇒ seqLookup(rest)
+        case Nil ⇒ None
       }
     }
 
