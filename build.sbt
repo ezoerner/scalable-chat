@@ -2,12 +2,12 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
 import scalariform.formatter.preferences._
 
-lazy val akkaVersion = "2.3.5"
+lazy val akkaVersion = "2.3.6"
 
 lazy val commonSettings = scalariformSettings ++ resolverSettings ++
                           releaseSettings ++  // ++ publishSettings
                           net.virtualvoid.sbt.graph.Plugin.graphSettings ++
-                          Seq(scalaVersion := "2.11.2",
+                          Seq(scalaVersion := "2.11.3",
                               scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8"),
                               parallelExecution in Test := false,
                               organization := "scalable_chat",
@@ -40,7 +40,7 @@ lazy val client = project.dependsOn(server % "test->compile",
             addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
   .settings(commonSubmoduleDependencies)
   .settings(libraryDependencies ++= Seq(
-                  "org.scalafx"         %%  "scalafx"            % "8.0.5-R5",
+                  "org.scalafx"         %%  "scalafx"            % "8.0.20-R6",
                   "org.scalafx"         %%  "scalafxml-core"     % "0.2.1"))
 
 lazy val server = project.dependsOn(infrastructure)

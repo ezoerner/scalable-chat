@@ -19,36 +19,69 @@ package scalable.server
 import akka.actor._
 import com.typesafe.config.ConfigFactory
 
+import scalable.server.user.{ UserSessionPartition, UserSessionService }
+import scalable.server.Configuration._
+
 /**
- * Main entry point for the server app.
+ * Main entry points for the server.
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 object Main {
-  val system = ActorSystem("Main")
 
-  def main(args: Array[String]): Unit = {
-    val a = system.actorOf(Props[ServerApp], "app")
-    system.actorOf(Props(classOf[Terminator], a), "terminator")
-  }
+  def main(args: Array[String]): Unit =
+    if (args.isEmpty) {
+      // dev only: used to test multiple systems in an embedded cluster
+      startupEmbeddedServiceNodes(Seq("2551", "2552", "0"))
+      Primary.main(Array.empty)
+    }
+    else
+      // for production, typically one port is passed into the command line
+      startupEmbeddedServiceNodes(args)
 
-  class Terminator(ref: ActorRef) extends Actor with ActorLogging {
-    context watch ref
-    def receive = {
-      case Terminated(_) ⇒
-        log.info("{} has terminated, shutting down system", ref.path)
-        system.shutdown()
+  /**
+   * Startup embedded actor systems.
+   * For a production app, this would typically be just one system per VM.
+   */
+  def startupEmbeddedServiceNodes(ports: Seq[String]): Unit = {
+    ports foreach { port ⇒
+      // Override the configuration of the port when specified as program argument
+      val config = ConfigFactory.parseString("akka.remote.netty.tcp.port=" + port).
+        withFallback(ConfigFactory.parseString(s"akka.cluster.roles = [$serviceRole]")).
+        withFallback(ConfigFactory.load())
+
+      val system = ActorSystem(AkkaSystemName, config)
+
+      // Create one UserSessionService and UserSessionPartition per service node.
+      // As specified in the configuration, (use-role = service)
+      // when a message is sent to a UserSession, we send it to a UserSessionService
+      // on any node in the cluster with the "service" role.
+      // The UserSessionService uses a cluster-aware router to forward the message
+      // to the "right" UserSessionPartition in the cluster.
+      system.actorOf(Props[UserSessionService], name = UserSessionServicePathElement)
+      system.actorOf(Props[UserSessionPartition], name = UserSessionPartitionPathElement)
+      // TODO: other services could be created here
     }
   }
 }
 
-object Configuration {
+/**
+ * Handle startup for a primary server node,
+ * i.e. one that is contacted by clients.
+ */
+object Primary {
+  def main(args: Array[String]): Unit = {
+    val system = ActorSystem(AkkaSystemName)
+    val a = system.actorOf(ServerApp.props(s"/user/$UserSessionServicePathElement"), "app")
+    system.actorOf(Props(classOf[Terminator], a, system), "terminator")
+  }
+}
 
-  private val config = ConfigFactory.load
-  config.checkValid(ConfigFactory.defaultReference)
-
-  val host = config.getString("scalable.host")
-  val portHttp = config.getInt("scalable.ports.http")
-  val portTcp = config.getInt("scalable.ports.tcp")
-  val portWs = config.getInt("scalable.ports.ws")
+class Terminator(ref: ActorRef, system: ActorSystem) extends Actor with ActorLogging {
+  context watch ref
+  def receive = {
+    case Terminated(_) ⇒
+      log.info("{} has terminated, shutting down system", ref.path)
+      system.shutdown()
+  }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package scalable.server
+package scalable.server.user
 
 import akka.actor._
 
@@ -23,36 +23,38 @@ import scalable.infrastructure.api.{ AskLogin, LoginResult }
 
 /**
  * State for a registered user (whether currently online or not).
+ * TODO: make this a PersistentActor
+ * TODO this needs to be extended to support multiple points of presence or at least to reinitialize the new
+ * connection when dropping an old one so, e.g. the message history is sent to the new connection
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 object UserSession {
   def props(login: AskLogin, connector: ActorRef) =
     Props(new UserSession(login.username, login.password, connector))
-
-  def userSessionName(username: String) = s"user-$username"
 }
 
 class UserSession(val username: String, val password: String, var tcpConnector: ActorRef)
     extends Actor with ActorLogging {
   log.debug("Constructing UserSession")
 
-  // For a newly created session, send LoginResult back to client for successful login
-  tcpConnector ! LoginResult(Ok, username)
-  loggedIn()
+  // For a newly created session, wait for the actual AskLogin message before sending
+  // the LoginResult to the connector
 
   override def receive: Receive = {
     case msg @ (login: AskLogin, connector: ActorRef) ⇒
       // login for existing session, verify password
-      log.debug(s"Received $msg")
+      log.info(s"Received $msg")
       assert(login.username == username)
       val resultStatus = if (login.password == password) {
         tcpConnector = connector
         loggedIn()
         Ok
       }
-      else WrongPassword
+      else
+        WrongPassword
       connector ! LoginResult(resultStatus, login.username)
+    case other ⇒ log.warning(s"Received unexpected message $other")
   }
 
   private def loggedIn(): Unit = {

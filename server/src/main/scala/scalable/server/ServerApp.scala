@@ -17,11 +17,15 @@
 package scalable.server
 
 import akka.actor._
+import akka.cluster.{ MemberStatus, Cluster }
+import akka.cluster.ClusterEvent._
 
+import scala.concurrent.forkjoin.ThreadLocalRandom
 import scala.util.Try
 import scalable.infrastructure.api._
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{ ClientDisconnected, NewConnection, TcpService }
+import scalable.server.user.UserSession
 
 /**
  * Root actor of the server application.
@@ -30,31 +34,30 @@ import scalable.server.tcp.{ ClientDisconnected, NewConnection, TcpService }
  */
 object ServerApp {
   val path = "/user/app"
+  def props(servicePath: String) = Props(new ServerApp(servicePath))
 }
 
-class ServerApp extends Actor with ActorLogging {
+class ServerApp(servicePath: String) extends Actor with ActorLogging {
   log.debug(s"Main Actor path=${self.path.toStringWithoutAddress}")
+
+  val cluster = Cluster(context.system)
+  val servicePathElements = servicePath match {
+    case RelativeActorPath(elements) ⇒ elements
+    case _                           ⇒ throw new IllegalArgumentException(s"servicePath [$servicePath] is not a valid relative actor path")
+  }
+
+  var nodes = Set.empty[Address]
+
+  override def preStart(): Unit = {
+    cluster.subscribe(self, classOf[MemberEvent], classOf[ReachabilityEvent])
+  }
+
+  override def postStop(): Unit = {
+    cluster.unsubscribe(self)
+  }
+
   context.actorOf(TcpService.props(self), "tcpService")
   lazy val lobbyChatRoom = context.actorOf(ChatRoom.props("Lobby"), "lobby")
-
-  private def login(login: AskLogin, connector: ActorRef): Unit = {
-    // We use dead simple authentication logic.
-    // if a session already exists for this user then the passwords will be checked.
-    // if the passwords are the same then the user rejoins the session
-    // otherwise the username is already taken and login is rejected
-
-    def createSession(): Try[ActorRef] = {
-      Try(context.actorOf(UserSession.props(login, connector), UserSession.userSessionName(login.username)))
-    }
-
-    val newSession = createSession()
-    newSession.recover {
-      case _: InvalidActorNameException ⇒
-        // existing session will verify password and send back a LoginResult
-        context.actorSelection(UserSession.userSessionName(login.username)) ! (login, connector)
-      case ex ⇒ throw ex
-    }
-  }
 
   override def receive = {
     case msg: AskLogin ⇒
@@ -77,7 +80,28 @@ class ServerApp extends Actor with ActorLogging {
       // TODO: have the user session track which chatrooms the user is in and
       // send the disconnected message to the user session, then the user
       // session can send leave messages to all the chat rooms the user is in
-      lobbyChatRoom ! LeaveChat(username, "Lobby") // HACK
-    case msg ⇒ log.error(s"Received unexpected message: $msg")
+      lobbyChatRoom ! LeaveChat(username, "Lobby")
+    case state: CurrentClusterState ⇒
+      nodes = state.members.collect {
+        case m if m.hasRole("service") && m.status == MemberStatus.Up ⇒ m.address
+      }
+    case MemberUp(m) if m.hasRole("service")        ⇒ nodes += m.address
+    case other: MemberEvent                         ⇒ nodes -= other.member.address
+    case UnreachableMember(m)                       ⇒ nodes -= m.address
+    case ReachableMember(m) if m.hasRole("service") ⇒ nodes += m.address
+
+    case msg                                        ⇒ log.error(s"Received unexpected message: $msg")
+  }
+
+  private def login(login: AskLogin, connector: ActorRef): Unit = {
+    // We use dead simple authentication logic.
+    // if a session already exists for this user then the passwords will be checked.
+    // if the passwords are the same then the user rejoins the session
+    // otherwise the username is already taken and login is rejected
+
+    // pick a random service node in the cluster
+    val address = nodes.toIndexedSeq(ThreadLocalRandom.current.nextInt(nodes.size))
+    val userSessionService = context.actorSelection(RootActorPath(address) / servicePathElements)
+    userSessionService ! (login, connector)
   }
 }
