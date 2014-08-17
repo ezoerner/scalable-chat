@@ -53,6 +53,8 @@ class Main extends JFXApp {
     scene = new Scene(root)
   }
 
+  loginListener.setLoginStage(stage)
+
   val rootActor = try {
     actorSystem.actorOf(ClientApp.props(loginListener), ClientApp.path)
   }

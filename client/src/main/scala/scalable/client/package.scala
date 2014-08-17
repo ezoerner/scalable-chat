@@ -22,7 +22,7 @@ import java.util.{ Calendar, TimeZone, UUID }
 import akka.actor.{ ActorRefFactory, ActorSelection }
 
 import scalable.client.tcp.TcpClient
-import scalafx.Includes.jfxParent2sfx
+import scalafx.Includes._
 import scalafx.scene.Parent
 import scalafxml.core.{ ControllerDependencyResolver, FXMLView }
 
@@ -63,5 +63,18 @@ package object client {
     require(uuid.version == 1)
     val timestamp: Long = uuid.timestamp
     (timestamp / 10000) + startEpoch
+  }
+
+  def nodeLookup[T](parent: javafx.scene.Node, clazz: Class[T]): Option[T] = {
+
+    def seqLookup(nodes: List[javafx.scene.Node]): Option[T] = {
+      nodes match {
+        case node :: _ if node.getClass.isAssignableFrom(clazz) ⇒ Some(node.asInstanceOf[T])
+        case (node: javafx.scene.Parent) :: rest ⇒ seqLookup(node.getChildrenUnmodifiable.toList ::: rest)
+        case _ :: rest ⇒ seqLookup(rest)
+      }
+    }
+
+    seqLookup(List(parent))
   }
 }

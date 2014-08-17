@@ -16,6 +16,8 @@
 
 package scalable.client
 
+import javafx.{ stage ⇒ jfxs }
+
 import akka.actor.ActorSystem
 import akka.event.Logging
 
@@ -30,6 +32,7 @@ import scalafx.event.ActionEvent
 import scalafx.scene.control.{ ToggleButton, Button, TextField }
 import scalafx.scene.layout.{ VBox, GridPane }
 import scalafx.scene.text.Text
+import scalafx.stage.Stage
 import scalafxml.core.macros.sfxml
 
 /**
@@ -53,6 +56,10 @@ class LoginController(private val usernameField: TextField,
 
   hostText.text = Configuration.host
   portText.text = Configuration.portTcp.toString
+
+  var stage: Stage = null
+
+  Platform.runLater(usernameField.requestFocus())
 
   def onKeyTyped(): Unit = {
     failedText.visible.value = false
@@ -88,6 +95,9 @@ class LoginController(private val usernameField: TextField,
       case Ok ⇒
         log.debug("Successful Login")
         appSupervisor ! OpenLobby(username)
+        Platform.runLater {
+          if (stage != null) stage.hide()
+        }
       case WrongPassword ⇒
         Platform.runLater(failedText.visible.value = true)
         log.error(s"Unsuccessful login: $resultStatus, $username")
@@ -97,4 +107,6 @@ class LoginController(private val usernameField: TextField,
   def exit() = {
     Platform.exit()
   }
+
+  override def setLoginStage(stage: Stage): Unit = this.stage = stage
 }

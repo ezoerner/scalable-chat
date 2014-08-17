@@ -19,6 +19,7 @@ package scalable.client.login
 import akka.actor.{ ActorLogging, Actor }
 
 import scalable.infrastructure.api.ResultStatus.ResultStatus
+import scalafx.stage.Stage
 
 /**
  * Actor trait to handle client-side login events.
@@ -40,4 +41,5 @@ trait LoginHandler {
 
 trait LoginListener {
   def loginResult(resultStatus: ResultStatus, username: String): Unit
+  def setLoginStage(stage: Stage): Unit
 }

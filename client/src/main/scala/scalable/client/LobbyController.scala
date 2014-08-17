@@ -22,6 +22,9 @@ import javafx.beans.value.{ ChangeListener, ObservableValue }
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.stage.WindowEvent
+import javafx.scene.{ control ⇒ jfxsc }
+import javafx.scene.{ web ⇒ jfxsw }
+import javafx.{ scene ⇒ jfxs }
 
 import akka.actor.ActorSystem
 import akka.event.Logging
@@ -42,6 +45,9 @@ import scalafx.scene.text.Text
 import scalafx.scene.web._
 import scalafx.stage.Stage
 import scalafxml.core.macros.sfxml
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /**
  * Controller for Lobby window.
  *
@@ -95,15 +101,30 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     chatHandler.addChatListener(this, RoomName)
     loginHandler.addListener(this)
 
-    Platform.runLater {
-      chatHandler.join(username, RoomName)
-      chatEditor.requestFocus()
-    }
+    Platform.runLater(chatHandler.join(username, RoomName))
 
     stage.setOnCloseRequest(new EventHandler[WindowEvent]() {
       override def handle(event: WindowEvent): Unit = chatHandler.leave(RoomName, username)
     })
+
+    giveEditorFocus(500 millis)
+    selectInitialFont()
   }
+
+  private def selectInitialFont() = Platform.runLater {
+    val parent = chatEditor.getChildrenUnmodifiable.head.asInstanceOf[jfxs.Parent]
+    val fontMenu = parent.getChildrenUnmodifiable()(1).asInstanceOf[jfxsc.ToolBar].getItems()(1).asInstanceOf[jfxsc.ComboBox[String]]
+    fontMenu.selectionModel().select("Helvetica")
+  }
+
+  private def giveEditorFocus(after: FiniteDuration) =
+    actorSystem.scheduler.scheduleOnce(after) {
+      Platform.runLater {
+        val someWebView = nodeLookup(chatEditor, classOf[jfxsw.WebView])
+        someWebView.foreach(_.engine.executeScript("document.body.focus()"))
+        chatEditor.requestFocus()
+      }
+    }
 
   override def joined(username: String): Unit = {
     log.debug(s"$username joined Lobby")
@@ -192,9 +213,8 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       chatHandler.sendChat(RoomName, username, html)
       chatEditor.htmlText = ""
     }
-    Platform.runLater {
-      chatEditor.requestFocus()
-    }
+
+    giveEditorFocus(500 millis)
   }
 
   private val headerFontStyle = s"""size="1" face="Courier" color="#1a3399""""
@@ -238,4 +258,5 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     htmlBuilder.insert(insertionIndex(divString), divString)
   }
 
+  override def setLoginStage(stage: Stage): Unit = {} // don't care
 }

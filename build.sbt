@@ -2,12 +2,12 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
 import scalariform.formatter.preferences._
 
-lazy val akkaVersion = "2.3.4"
+lazy val akkaVersion = "2.3.5"
 
 lazy val commonSettings = scalariformSettings ++ resolverSettings ++
                           releaseSettings ++  // ++ publishSettings
                           net.virtualvoid.sbt.graph.Plugin.graphSettings ++
-                          Seq(scalaVersion := "2.11.1",
+                          Seq(scalaVersion := "2.11.2",
                               scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8"),
                               parallelExecution in Test := false,
                               organization := "scalable_chat",
@@ -37,7 +37,7 @@ lazy val client = project.dependsOn(server % "test->compile",
   .settings(commonSettings: _*)
   .settings(fork := true,
             mainClass in Compile := Some("Start"),
-            addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0" cross CrossVersion.full))
+            addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
   .settings(commonSubmoduleDependencies)
   .settings(libraryDependencies ++= Seq(
                   "org.scalafx"         %%  "scalafx"            % "8.0.5-R5",
@@ -48,10 +48,11 @@ lazy val server = project.dependsOn(infrastructure)
   .settings(commonSubmoduleDependencies)
   .settings(fork := true,
             libraryDependencies ++= Seq(
-                  "com.datastax.cassandra" %   "cassandra-driver-core"        % "2.0.3",
+                  "com.datastax.cassandra" %  "cassandra-driver-core"         % "2.0.3",
                   "com.typesafe.akka"      %% "akka-persistence-experimental" % akkaVersion,
                   "com.github.krasserm"    %% "akka-persistence-cassandra"    % "0.3.2",
-                  "com.typesafe.akka"      %%  "akka-testkit"                 % akkaVersion   % "test"))
+                  "com.typesafe.akka"      %% "akka-cluster"                  % akkaVersion,
+                  "com.typesafe.akka"      %% "akka-testkit"                  % akkaVersion   % "test"))
 
 lazy val scalable =
   project.in(file("."))
