@@ -41,7 +41,7 @@ lazy val client = project.dependsOn(server % "test->compile",
   .settings(commonSubmoduleDependencies)
   .settings(libraryDependencies ++= Seq(
                   "org.scalafx"         %%  "scalafx"            % "8.0.5-R5",
-                  "org.scalafx"         %%  "scalafxml-core"     % "0.2.1-SNAPSHOT"))
+                  "org.scalafx"         %%  "scalafxml-core"     % "0.2.1"))
 
 lazy val server = project.dependsOn(infrastructure)
   .settings(commonSettings: _*)
