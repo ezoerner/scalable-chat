@@ -48,9 +48,8 @@ lazy val server = project.dependsOn(infrastructure)
   .settings(commonSubmoduleDependencies)
   .settings(fork := true,
             libraryDependencies ++= Seq(
-                  "com.datastax.cassandra" %  "cassandra-driver-core"         % "2.0.3",
                   "com.typesafe.akka"      %% "akka-persistence-experimental" % akkaVersion,
-                  "com.github.krasserm"    %% "akka-persistence-cassandra"    % "0.3.2",
+                  "com.github.krasserm"    %% "akka-persistence-cassandra"    % "0.3.4",
                   "com.typesafe.akka"      %% "akka-cluster"                  % akkaVersion,
                   "com.typesafe.akka"      %% "akka-testkit"                  % akkaVersion   % "test"))
 
