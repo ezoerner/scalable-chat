@@ -26,27 +26,17 @@ class UserSessionTest extends Specification with NoTimeConversions {
 
   "A UserSession" should {
 
-    "send a LoginResult to the connector when it is created" in new TestContext {
-      val connector = TestProbe()
-      val askLogin = AskLogin(TestUsername, "pass")
-      val userSession = system.actorOf(UserSession.props(askLogin, connector.ref))
-
-      val expectedLoginResult = LoginResult(Ok, TestUsername)
-      connector.expectMsg(1.second, expectedLoginResult)
-    }
-
     "send a LoginResult to the connector when it is created and when " +
       "correct user reconnects with same connector" in new TestContext {
         val connector = TestProbe()
         val askLogin = AskLogin(TestUsername, "pass")
-        val userSession = system.actorOf(UserSession.props(askLogin, connector.ref))
-        val expectedLoginResult = LoginResult(Ok, TestUsername)
-        connector.expectMsg(1.second, expectedLoginResult)
+        val userSession = system.actorOf(UserSession.props(askLogin))
+        connector.expectNoMsg(200.milliseconds)
 
+        val expectedLoginResult = LoginResult(Ok, TestUsername)
         userSession ! (askLogin, connector.ref)
         connector.expectMsg(1.second, expectedLoginResult)
       }
-
   }
 
 }

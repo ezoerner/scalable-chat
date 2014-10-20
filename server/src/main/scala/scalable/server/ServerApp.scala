@@ -17,15 +17,13 @@
 package scalable.server
 
 import akka.actor._
-import akka.cluster.{ MemberStatus, Cluster }
 import akka.cluster.ClusterEvent._
+import akka.cluster.{ Cluster, MemberStatus }
 
 import scala.concurrent.forkjoin.ThreadLocalRandom
-import scala.util.Try
 import scalable.infrastructure.api._
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{ ClientDisconnected, NewConnection, TcpService }
-import scalable.server.user.UserSession
 
 /**
  * Root actor of the server application.
@@ -34,6 +32,7 @@ import scalable.server.user.UserSession
  */
 object ServerApp {
   val path = "/user/app"
+
   def props(servicePath: String) = Props(new ServerApp(servicePath))
 }
 

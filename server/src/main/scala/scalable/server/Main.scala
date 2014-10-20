@@ -31,12 +31,12 @@ object Main {
 
   def main(args: Array[String]): Unit =
     if (args.isEmpty) {
-      // dev only: used to test multiple systems in an embedded cluster
+      // for development and testing with an embedded cluster
       startupEmbeddedServiceNodes(Seq("2551", "2552", "0"))
-      Primary.main(Array.empty)
+      Front.main(Array.empty)
     }
     else
-      // for production, typically one port is passed into the command line
+      // for production typically one port is passed into the command line
       startupEmbeddedServiceNodes(args)
 
   /**
@@ -57,7 +57,7 @@ object Main {
       // when a message is sent to a UserSession, we send it to a UserSessionService
       // on any node in the cluster with the "service" role.
       // The UserSessionService uses a cluster-aware router to forward the message
-      // to the "right" UserSessionPartition in the cluster.
+      // to the "right" UserSessionPartition in the cluster for that user.
       system.actorOf(Props[UserSessionService], name = UserSessionServicePathElement)
       system.actorOf(Props[UserSessionPartition], name = UserSessionPartitionPathElement)
       // TODO: other services could be created here
@@ -66,10 +66,10 @@ object Main {
 }
 
 /**
- * Handle startup for a primary server node,
- * i.e. one that is contacted by clients.
+ * Handle startup for a front end cluster node,
+ * i.e. one that provides connections to network clients.
  */
-object Primary {
+object Front {
   def main(args: Array[String]): Unit = {
     val system = ActorSystem(AkkaSystemName)
     val a = system.actorOf(ServerApp.props(s"/user/$UserSessionServicePathElement"), "app")

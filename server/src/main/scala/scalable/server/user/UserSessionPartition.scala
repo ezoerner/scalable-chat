@@ -17,13 +17,13 @@ class UserSessionPartition extends Actor with ActorLogging {
 
   var userSessions: mutable.Map[String, ActorRef] = mutable.Map.empty
 
-  private def createSession(login: AskLogin, connector: ActorRef): ActorRef =
-    context.actorOf(UserSession.props(login, connector), login.username)
+  private def createSession(login: AskLogin): ActorRef =
+    context.actorOf(UserSession.props(login), login.username)
 
   override def receive: Receive = {
     case msg @ (login: AskLogin, connector: ActorRef) ⇒
       log.info(s"received login user ${login.username}")
-      val userSession = userSessions.getOrElseUpdate(login.username, createSession(login, connector))
+      val userSession = userSessions.getOrElseUpdate(login.username, createSession(login))
       userSession ! msg
     case other ⇒ log.warning(s"Received unexpected message $other")
   }

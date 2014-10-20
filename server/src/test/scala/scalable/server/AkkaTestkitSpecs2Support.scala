@@ -28,7 +28,7 @@ import scala.concurrent.duration._
  * Thanks to Age Mooij for posting the example at
  * <a href="http://blog.xebia.com/2012/10/01/testing-akka-with-specs2/">http://blog.xebia.com/2012/10/01/testing-akka-with-specs2/</a>
  */
-abstract class AkkaTestkitSpecs2Support extends TestKit(ActorSystem("default"))
+abstract class AkkaTestkitSpecs2Support extends TestKit(ActorSystem("test"))
     with After
     with ImplicitSender {
   // make sure we shut down the actor system after all tests have run

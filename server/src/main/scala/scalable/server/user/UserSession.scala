@@ -26,17 +26,19 @@ import scalable.infrastructure.api.{ AskLogin, LoginResult }
  * TODO: make this a PersistentActor
  * TODO this needs to be extended to support multiple points of presence or at least to reinitialize the new
  * connection when dropping an old one so, e.g. the message history is sent to the new connection
+ * TODO: Timeout connection if idle
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
 object UserSession {
-  def props(login: AskLogin, connector: ActorRef) =
-    Props(new UserSession(login.username, login.password, connector))
+  def props(login: AskLogin) =
+    Props(new UserSession(login.username, login.password))
 }
 
-class UserSession(val username: String, val password: String, var tcpConnector: ActorRef)
+class UserSession(val username: String, val password: String)
     extends Actor with ActorLogging {
   log.debug("Constructing UserSession")
+  var tcpConnector: Option[ActorRef] = None
 
   // For a newly created session, wait for the actual AskLogin message before sending
   // the LoginResult to the connector
@@ -47,8 +49,8 @@ class UserSession(val username: String, val password: String, var tcpConnector: 
       log.info(s"Received $msg")
       assert(login.username == username)
       val resultStatus = if (login.password == password) {
-        tcpConnector = connector
-        loggedIn()
+        tcpConnector = Some(connector)
+        onConnect(connector)
         Ok
       }
       else
@@ -57,7 +59,7 @@ class UserSession(val username: String, val password: String, var tcpConnector: 
     case other ⇒ log.warning(s"Received unexpected message $other")
   }
 
-  private def loggedIn(): Unit = {
+  private def onConnect(connector: ActorRef): Unit = {
   }
 }
 
