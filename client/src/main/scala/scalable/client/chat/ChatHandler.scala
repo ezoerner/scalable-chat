@@ -35,7 +35,10 @@ trait ChatHandler {
   this: Actor with ActorLogging ⇒
 
   private val tcpClient = tcpClientSelection(context.system)
-  private implicit val timeout: Timeout = 5.second // TODO: make this configurable
+
+  // scalable-chat #25
+  // TODO: make this configurable
+  private implicit val timeout: Timeout = 5.second
 
   def noListener(roomName: String) = log.error(s"Could not find chat room $roomName")
 

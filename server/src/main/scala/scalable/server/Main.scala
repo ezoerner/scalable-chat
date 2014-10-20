@@ -60,7 +60,7 @@ object Main {
       // to the "right" UserSessionPartition in the cluster for that user.
       system.actorOf(Props[UserSessionService], name = UserSessionServicePathElement)
       system.actorOf(Props[UserSessionPartition], name = UserSessionPartitionPathElement)
-      // TODO: other services could be created here
+      // other services could be created here
     }
   }
 }

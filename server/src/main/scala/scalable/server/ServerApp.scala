@@ -76,6 +76,7 @@ class ServerApp(servicePath: String) extends Actor with ActorLogging {
       lobbyChatRoom ! msg
     case msg @ ClientDisconnected(username) ⇒
       // for now, just let the lobby know that the user has disconnected,
+      // scalable-chat #16
       // TODO: have the user session track which chatrooms the user is in and
       // send the disconnected message to the user session, then the user
       // session can send leave messages to all the chat rooms the user is in

@@ -159,6 +159,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     receiveParticipants(participants)
   }
 
+  // scalable-chat #26
   // TODO: Deactivate the chat while connection is closed and then reactivate after new RoomInfo is received
   override def loginResult(resultStatus: ResultStatus, user: String): Unit = {
     if (resultStatus == ResultStatus.Ok) {
