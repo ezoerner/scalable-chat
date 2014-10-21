@@ -27,17 +27,29 @@ import scalable.server.Configuration._
  *
  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
  */
-object Main {
 
-  def main(args: Array[String]): Unit =
-    if (args.isEmpty) {
-      // for development and testing with an embedded cluster
-      startupEmbeddedServiceNodes(Seq("2551", "2552", "0"))
-      Front.main(Array.empty)
-    }
-    else
-      // for production typically one port is passed into the command line
-      startupEmbeddedServiceNodes(args)
+/**
+ * Start default frontend and backend cluster nodes in a single VM.
+ */
+object Standalone {
+
+  def main(args: Array[String]): Unit = {
+    // for development and testing with an embedded cluster
+    Back.startupEmbeddedServiceNodes(Seq("2551", "2552", "0"))
+    Front.main(Array.empty)
+  }
+}
+
+object Back {
+
+  /**
+   * Start a backend node with one embedded service node per given port.
+   * In production typically only one port is passed on the command line.
+   */
+  def main(args: Array[String]): Unit = {
+    val ports = if (args.isEmpty) Array("0") else args
+    startupEmbeddedServiceNodes(ports)
+  }
 
   /**
    * Startup embedded actor systems.
@@ -45,7 +57,7 @@ object Main {
    */
   def startupEmbeddedServiceNodes(ports: Seq[String]): Unit = {
     ports foreach { port ⇒
-      // Override the configuration of the port when specified as program argument
+      // Override the configuration of the port
       val config = ConfigFactory.parseString("akka.remote.netty.tcp.port=" + port).
         withFallback(ConfigFactory.parseString(s"akka.cluster.roles = [$serviceRole]")).
         withFallback(ConfigFactory.load())
