@@ -10,8 +10,12 @@
 * ScalaFX client
 * Akka in both client and server
 * Akka I/O used for client server communications
+* Akka Cluster with cluster-aware routing
 * Akka Persistence with Cassandra
 * Akka Testkit and Specs2 testing
+
+### Future ###
+The plan is instead of using cluster-aware routing for users and chatrooms, use cluster sharding.
 
 ### How do I get set up? ###
 
