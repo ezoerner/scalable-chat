@@ -15,7 +15,7 @@
 * Akka Testkit and Specs2 testing
 
 ### Future ###
-The plan is instead of using cluster-aware routing for users and chatrooms, use cluster sharding.
+The plan is instead of using cluster-aware routing for users and chatrooms, use Akka Cluster Sharding.
 
 ### How do I get set up? ###
 
