@@ -21,7 +21,7 @@ Also, instead of using Akka TCP sockets, use Akka HTTP (built on Reactive Stream
 
 ### How do I get set up? ###
 
-* Requires Java 8
+* Requires Java 8 (though the project is written entirely in Scala)
 * Configuration files are in `server/src/main/resources/application.conf` and `client/src/main/resources/application.conf` for server and client respectively.
   This is where the IP address and/or port can be changed for the server socket.
 * To run the server:  `./activator server/run`
