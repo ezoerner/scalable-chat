@@ -3,7 +3,7 @@
 ### What is this repository for? ###
 
 * A sample multiuser application with a scalable architecture.
-* A chat room application that demonstrates persistence by storing chat history
+* A chat room application that demonstrates akka-persistence by storing chat history
 
 ### Technology Stack ###
 
@@ -15,7 +15,9 @@
 * Akka Testkit and Specs2 testing
 
 ### Future ###
-The plan is instead of using cluster-aware routing for users and chatrooms, use Akka Cluster Sharding.
+The plan is instead of using cluster-aware routing for users and chatrooms, use Akka Cluster Sharding in combination with akka-persistence.
+
+Also, instead of using Akka TCP, use Akka HTTP for communications between client and server.
 
 ### How do I get set up? ###
 
