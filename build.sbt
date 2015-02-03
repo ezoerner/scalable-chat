@@ -2,24 +2,24 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
 import scalariform.formatter.preferences._
 
-lazy val akkaVersion = "2.3.6"
+lazy val akkaVersion = "2.3.7"
 
 lazy val commonSettings = scalariformSettings ++ resolverSettings ++
                           releaseSettings ++  // ++ publishSettings
                           net.virtualvoid.sbt.graph.Plugin.graphSettings ++
-                          Seq(scalaVersion := "2.11.3",
+                          Seq(scalaVersion := "2.11.4",
                               scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8"),
                               parallelExecution in Test := false,
                               organization := "scalable_chat",
                               ScalariformKeys.preferences := FormattingPreferences()
                                 .setPreference(AlignParameters, true)
-                                .setPreference(RewriteArrowSymbols, true)
                                 .setPreference(CompactControlReadability, true)
                                 .setPreference(DoubleIndentClassDeclaration, true)
                                 .setPreference(PreserveDanglingCloseParenthesis, true)
                                 .setPreference(AlignSingleLineCaseStatements, true)
-                                .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, false)
-                                .setPreference(MultilineScaladocCommentsStartOnFirstLine, false))
+                                .setPreference(IndentLocalDefs, true)
+                                .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
+                                .setPreference(MultilineScaladocCommentsStartOnFirstLine, true))
 
 lazy val resolverSettings = Seq(resolvers ++= Seq("krasserm at bintray" at "http://dl.bintray.com/krasserm/maven"))
 
@@ -30,6 +30,9 @@ lazy val commonSubmoduleDependencies = libraryDependencies ++= Seq(
 
 lazy val infrastructure = project.settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
+  .settings(libraryDependencies ++= Seq(
+    "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-M2"
+  ))
 
 // Fork a new JVM for 'run' and 'test:run', to avoid JavaFX double initialization problems
 lazy val client = project.dependsOn(server % "test->compile",
