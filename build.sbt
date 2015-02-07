@@ -28,7 +28,7 @@ lazy val commonSubmoduleDependencies = libraryDependencies ++= Seq(
                   "com.typesafe.akka"     %%  "akka-actor"              % akkaVersion,
                   "ch.qos.logback"        %   "logback-classic"         % "1.1.2")
 
-lazy val infrastructure = project.settings(commonSettings: _*)
+lazy val messaging = project.settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
   .settings(libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-M2"
@@ -36,7 +36,7 @@ lazy val infrastructure = project.settings(commonSettings: _*)
 
 // Fork a new JVM for 'run' and 'test:run', to avoid JavaFX double initialization problems
 lazy val client = project.dependsOn(server % "test->compile",
-                                    infrastructure )
+                                    messaging )
   .settings(commonSettings: _*)
   .settings(fork := true,
             mainClass in Compile := Some("Start"),
@@ -46,7 +46,7 @@ lazy val client = project.dependsOn(server % "test->compile",
                   "org.scalafx"         %%  "scalafx"            % "8.0.20-R6",
                   "org.scalafx"         %%  "scalafxml-core"     % "0.2.1"))
 
-lazy val server = project.dependsOn(infrastructure)
+lazy val server = project.dependsOn(messaging)
   .settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
   .settings(fork := true,
@@ -56,7 +56,6 @@ lazy val server = project.dependsOn(infrastructure)
                   "com.typesafe.akka"      %% "akka-cluster"                  % akkaVersion,
                   "com.typesafe.akka"      %% "akka-testkit"                  % akkaVersion   % "test"))
 
-lazy val `scalable-chat` =
-  project.in(file("."))
-    .aggregate(infrastructure, client, server)
+lazy val `scalable-chat` = project.in(file("."))
+    .aggregate(messaging, client, server)
     .settings(commonSettings: _*)
