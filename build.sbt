@@ -56,8 +56,7 @@ lazy val server = project.dependsOn(infrastructure)
                   "com.typesafe.akka"      %% "akka-cluster"                  % akkaVersion,
                   "com.typesafe.akka"      %% "akka-testkit"                  % akkaVersion   % "test"))
 
-lazy val scalable =
+lazy val `scalable-chat` =
   project.in(file("."))
     .aggregate(infrastructure, client, server)
     .settings(commonSettings: _*)
-
