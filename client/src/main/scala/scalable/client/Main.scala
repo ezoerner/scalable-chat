@@ -25,7 +25,7 @@ import com.typesafe.config.ConfigFactory
 import scala.reflect.runtime.universe.typeOf
 import scala.util.control.NonFatal
 import scalable.client.login.LoginListener
-import scalable.infrastructure.api.ResultStatus._
+import scalable.messaging.api.ResultStatus._
 import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage

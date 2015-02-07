@@ -27,7 +27,7 @@ import scala.reflect.runtime.universe.typeOf
 import scalable.client.chat.{ ChatController, ChatHandler }
 import scalable.client.login.{ LoginHandler, LoginListener }
 import scalable.client.tcp.TcpClient
-import scalable.infrastructure.api._
+import scalable.messaging.api._
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.scene.Scene

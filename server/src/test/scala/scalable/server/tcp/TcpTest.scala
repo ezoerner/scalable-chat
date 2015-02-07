@@ -24,7 +24,7 @@ import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.duration._
-import scalable.infrastructure.api._
+import scalable.messaging.api._
 import scalable.server.{ Configuration, AkkaTestkitSpecs2Support }
 
 abstract class TcpClientAndServer extends AkkaTestkitSpecs2Support {

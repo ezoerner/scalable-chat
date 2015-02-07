@@ -23,7 +23,7 @@ import akka.util.Timeout
 
 import scala.concurrent.duration._
 import scalable.client._
-import scalable.infrastructure.api._
+import scalable.messaging.api._
 
 /** Actor trait to handle client-side chat events for all chat rooms.
   *

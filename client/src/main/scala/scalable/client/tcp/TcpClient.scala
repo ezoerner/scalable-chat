@@ -22,8 +22,8 @@ import akka.util.ByteString
 
 import scala.concurrent.duration._
 import scala.util.Random
-import scalable.infrastructure.api._
-import scalable.infrastructure.tcp.SimpleBuffer
+import scalable.messaging.api._
+import scalable.messaging.tcp.SimpleBuffer
 
 /** Tcp Client.
   *

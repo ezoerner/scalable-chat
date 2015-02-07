@@ -21,8 +21,8 @@ import java.net.InetSocketAddress
 import akka.actor.{ Actor, ActorRef, Props }
 import akka.io.{ IO, Tcp }
 
-import scalable.infrastructure.api.SerializableMessage
-import scalable.infrastructure.tcp.SimpleBuffer
+import scalable.messaging.api.SerializableMessage
+import scalable.messaging.tcp.SimpleBuffer
 
 /**
  * Test tcp client.

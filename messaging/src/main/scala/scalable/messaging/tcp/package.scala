@@ -1,4 +1,4 @@
-package scalable.infrastructure
+package scalable.messaging
 
 import java.nio.ByteOrder
 

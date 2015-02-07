@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package scalable.infrastructure.api
+package scalable.messaging.api
 
 import java.util.UUID
 
@@ -22,7 +22,7 @@ import akka.actor.{ Actor, ActorSystem }
 import akka.util.ByteString
 import org.specs2.mutable.Specification
 
-import scalable.infrastructure.api.ResultStatus._
+import scalable.messaging.api.ResultStatus._
 
 /**
  * Tests serialization and deserialization of messages

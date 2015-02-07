@@ -19,8 +19,8 @@ package scalable.server.tcp
 import akka.actor._
 import akka.util.{ ByteStringBuilder, ByteString }
 
-import scalable.infrastructure.api._
-import scalable.infrastructure.tcp.SimpleBuffer
+import scalable.messaging.api._
+import scalable.messaging.tcp.SimpleBuffer
 
 object TcpServer {
   def props(connection: ActorRef, listener: ActorRef) = Props(new TcpServer(connection, listener))

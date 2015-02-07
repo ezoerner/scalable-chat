@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package scalable.infrastructure.tcp
+package scalable.messaging.tcp
 
 import akka.actor.ActorSystem
 import akka.util.{ ByteString, ByteStringBuilder }
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import scalable.infrastructure.api.SerializableMessage
+import scalable.messaging.api.SerializableMessage
 
 /** @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
   */

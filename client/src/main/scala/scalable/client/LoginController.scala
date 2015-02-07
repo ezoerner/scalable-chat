@@ -25,8 +25,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.util.Try
 import scalable.client.login.LoginListener
-import scalable.infrastructure.api.AskLogin
-import scalable.infrastructure.api.ResultStatus._
+import scalable.messaging.api.AskLogin
+import scalable.messaging.api.ResultStatus._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent
 import scalafx.scene.control.{ ToggleButton, Button, TextField }

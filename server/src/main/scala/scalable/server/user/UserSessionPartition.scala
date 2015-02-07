@@ -3,7 +3,7 @@ package scalable.server.user
 import akka.actor.{ Actor, ActorLogging, ActorRef }
 
 import scala.collection.mutable
-import scalable.infrastructure.api.AskLogin
+import scalable.messaging.api.AskLogin
 
 /** A partition of UserSessions and routee of the UserSessionService.
   * This actor just forwards messages to UserSessions with this as the sender.

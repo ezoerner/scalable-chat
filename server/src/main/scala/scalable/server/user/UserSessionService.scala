@@ -4,7 +4,7 @@ import akka.actor.{ Actor, ActorRef }
 import akka.routing.ConsistentHashingRouter.ConsistentHashableEnvelope
 import akka.routing.FromConfig
 
-import scalable.infrastructure.api.AskLogin
+import scalable.messaging.api.AskLogin
 import scalable.server.Configuration
 
 /** Service that provides access to UserSessions.

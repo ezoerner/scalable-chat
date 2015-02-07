@@ -21,7 +21,7 @@ import akka.persistence._
 import com.datastax.driver.core.utils.UUIDs
 
 import scala.collection.SortedSet
-import scalable.infrastructure.api._
+import scalable.messaging.api._
 
 /** Chat room actor.
   *

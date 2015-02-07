@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package scalable.infrastructure.api
+package scalable.messaging.api
 
 import java.util.UUID
 
@@ -26,7 +26,7 @@ object ResultStatus extends Enumeration {
   type ResultStatus = Value
   val Ok, WrongPassword = Value
 }
-import scalable.infrastructure.api.ResultStatus._
+import scalable.messaging.api.ResultStatus._
 
 object SerializableMessage {
   def apply(byteString: ByteString)(implicit system: ActorSystem): SerializableMessage = {

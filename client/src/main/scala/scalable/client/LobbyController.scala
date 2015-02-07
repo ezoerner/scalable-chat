@@ -34,8 +34,8 @@ import scala.collection.SortedMap
 import scalable.client.chat.views.Browser
 import scalable.client.chat.{ ChatController, ChatHandler, ChatListener }
 import scalable.client.login.{ LoginHandler, LoginListener }
-import scalable.infrastructure.api.ResultStatus.ResultStatus
-import scalable.infrastructure.api._
+import scalable.messaging.api.ResultStatus.ResultStatus
+import scalable.messaging.api._
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent

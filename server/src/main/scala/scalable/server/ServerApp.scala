@@ -21,7 +21,7 @@ import akka.cluster.ClusterEvent._
 import akka.cluster.{ Cluster, MemberStatus }
 
 import scala.concurrent.forkjoin.ThreadLocalRandom
-import scalable.infrastructure.api._
+import scalable.messaging.api._
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{ ClientDisconnected, NewConnection, TcpService }
 

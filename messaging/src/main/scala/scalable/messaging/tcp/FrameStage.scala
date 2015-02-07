@@ -1,4 +1,4 @@
-package scalable.infrastructure.tcp
+package scalable.messaging.tcp
 
 import akka.stream.stage.Context
 import akka.stream.stage.Directive

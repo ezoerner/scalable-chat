@@ -4,10 +4,10 @@ import akka.testkit.TestProbe
 import org.specs2.time.NoTimeConversions
 import org.specs2.mutable.Specification
 
-import scalable.infrastructure.api.{ LoginResult, AskLogin }
+import scalable.messaging.api.{ LoginResult, AskLogin }
 import scalable.server.AkkaTestkitSpecs2Support
 import scala.concurrent.duration._
-import scalable.infrastructure.api.ResultStatus._
+import scalable.messaging.api.ResultStatus._
 
 /**
  * Tests for UserSessions.
