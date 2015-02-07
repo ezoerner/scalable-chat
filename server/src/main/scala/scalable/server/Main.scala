@@ -22,15 +22,13 @@ import com.typesafe.config.ConfigFactory
 import scalable.server.user.{ UserSessionPartition, UserSessionService }
 import scalable.server.Configuration._
 
-/**
- * Main entry points for the server.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Main entry points for the server.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 
-/**
- * Start default frontend and backend cluster nodes in a single VM.
- */
+/** Start default frontend and backend cluster nodes in a single VM.
+  */
 object Standalone {
 
   def main(args: Array[String]): Unit = {
@@ -42,19 +40,17 @@ object Standalone {
 
 object Back {
 
-  /**
-   * Start a backend node with one embedded service node per given port.
-   * In production typically only one port is passed on the command line.
-   */
+  /** Start a backend node with one embedded service node per given port.
+    * In production typically only one port is passed on the command line.
+    */
   def main(args: Array[String]): Unit = {
     val ports = if (args.isEmpty) Array("0") else args
     startupEmbeddedServiceNodes(ports)
   }
 
-  /**
-   * Startup embedded actor systems.
-   * For a production app, this would typically be just one system per VM.
-   */
+  /** Startup embedded actor systems.
+    * For a production app, this would typically be just one system per VM.
+    */
   def startupEmbeddedServiceNodes(ports: Seq[String]): Unit = {
     ports foreach { port ⇒
       // Override the configuration of the port
@@ -77,10 +73,9 @@ object Back {
   }
 }
 
-/**
- * Handle startup for a front end cluster node,
- * i.e. one that provides connections to network clients.
- */
+/** Handle startup for a front end cluster node,
+  * i.e. one that provides connections to network clients.
+  */
 object Front {
   def main(args: Array[String]): Unit = {
     val system = ActorSystem(AkkaSystemName)

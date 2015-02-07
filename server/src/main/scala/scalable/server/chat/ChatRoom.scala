@@ -23,11 +23,10 @@ import com.datastax.driver.core.utils.UUIDs
 import scala.collection.SortedSet
 import scalable.infrastructure.api._
 
-/**
- * Chat room actor.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Chat room actor.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 
 trait Event
 case class AddParticipant(username: String, connector: ActorRef) extends Event

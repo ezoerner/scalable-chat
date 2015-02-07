@@ -48,11 +48,10 @@ import scalafxml.core.macros.sfxml
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/**
- * Controller for Lobby window.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Controller for Lobby window.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 @sfxml
 class LobbyController(private val onlineTitledPane: TitledPane,
                       private val accordion: Accordion,
@@ -107,7 +106,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       override def handle(event: WindowEvent): Unit = chatHandler.leave(RoomName, username)
     })
 
-    giveEditorFocus(500 millis)
+    giveEditorFocus(500.millis)
     selectInitialFont()
   }
 
@@ -201,12 +200,12 @@ class LobbyController(private val onlineTitledPane: TitledPane,
 
   def sendChat(event: ActionEvent) = {
 
-    def extractNewContent(htmlString: String) = {
-      val beginBody = htmlString.indexOf("<body")
-      val begin = htmlString.indexOf('>', beginBody) + 1
-      val end = htmlString.lastIndexOf("</body>")
-      htmlString.substring(begin, end)
-    }
+      def extractNewContent(htmlString: String) = {
+        val beginBody = htmlString.indexOf("<body")
+        val begin = htmlString.indexOf('>', beginBody) + 1
+        val end = htmlString.lastIndexOf("</body>")
+        htmlString.substring(begin, end)
+      }
 
     val html = extractNewContent(chatEditor.htmlText)
     if (!html.isEmpty) {
@@ -215,7 +214,7 @@ class LobbyController(private val onlineTitledPane: TitledPane,
       chatEditor.htmlText = ""
     }
 
-    giveEditorFocus(500 millis)
+    giveEditorFocus(500.millis)
   }
 
   private val headerFontStyle = s"""size="1" face="Courier" color="#1a3399""""
@@ -231,24 +230,24 @@ class LobbyController(private val onlineTitledPane: TitledPane,
     lazy val dateView = s"$headerFontStart${dateFormat.format(new Date(timestamp))}$fontEnd"
     lazy val senderView = headerFontStart + sender + fontEnd
 
-    def insertionIndex(stringToInsert: String): Int = {
-      val indexDisplacement = stringToInsert.length
-      if (insertionIndexes.lastOption.fold(true) { case (t, i) ⇒ timestamp >= t }) {
-        val index = bottomInsertionIndex
-        bottomInsertionIndex = bottomInsertionIndex + indexDisplacement
-        insertionIndexes = insertionIndexes + (timestamp → index)
-        index
+      def insertionIndex(stringToInsert: String): Int = {
+        val indexDisplacement = stringToInsert.length
+        if (insertionIndexes.lastOption.fold(true) { case (t, i) ⇒ timestamp >= t }) {
+          val index = bottomInsertionIndex
+          bottomInsertionIndex = bottomInsertionIndex + indexDisplacement
+          insertionIndexes = insertionIndexes + (timestamp → index)
+          index
+        }
+        else {
+          val pivotIndex = (insertionIndexes to timestamp).size
+          val (beforeMap, afterMap) = insertionIndexes.splitAt(pivotIndex)
+          assert(afterMap.nonEmpty)
+          val insertionIndexIntoWeb = afterMap.head._2
+          val updatedAfterMap = afterMap.map { case (k, v) ⇒ k → (v + indexDisplacement) }
+          insertionIndexes = (beforeMap + (timestamp → insertionIndexIntoWeb)) ++ updatedAfterMap
+          insertionIndexIntoWeb
+        }
       }
-      else {
-        val pivotIndex = (insertionIndexes to timestamp).size
-        val (beforeMap, afterMap) = insertionIndexes.splitAt(pivotIndex)
-        assert(!afterMap.isEmpty)
-        val insertionIndexIntoWeb = afterMap.head._2
-        val updatedAfterMap = afterMap.map { case (k, v) ⇒ k → (v + indexDisplacement) }
-        insertionIndexes = (beforeMap + (timestamp → insertionIndexIntoWeb)) ++ updatedAfterMap
-        insertionIndexIntoWeb
-      }
-    }
 
     val divString = s"""<div><table>
                           |<colgroup><col style="background-color:rgb($r, $g, $b);"></colgroup>

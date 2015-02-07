@@ -7,7 +7,7 @@ lazy val akkaVersion = "2.3.7"
 lazy val commonSettings = scalariformSettings ++ resolverSettings ++
                           releaseSettings ++  // ++ publishSettings
                           net.virtualvoid.sbt.graph.Plugin.graphSettings ++
-                          Seq(scalaVersion := "2.11.4",
+                          Seq(scalaVersion := "2.11.5",
                               scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8"),
                               parallelExecution in Test := false,
                               organization := "scalable_chat",

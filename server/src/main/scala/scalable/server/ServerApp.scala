@@ -25,11 +25,10 @@ import scalable.infrastructure.api._
 import scalable.server.chat.ChatRoom
 import scalable.server.tcp.{ ClientDisconnected, NewConnection, TcpService }
 
-/**
- * Root actor of the server application.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Root actor of the server application.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 object ServerApp {
   val path = "/user/app"
 

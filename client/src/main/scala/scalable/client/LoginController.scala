@@ -35,11 +35,10 @@ import scalafx.scene.text.Text
 import scalafx.stage.Stage
 import scalafxml.core.macros.sfxml
 
-/**
- * Handles Login operations.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Handles Login operations.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 @sfxml
 class LoginController(private val usernameField: TextField,
                       private val passwordField: TextField,

@@ -2,11 +2,10 @@ package scalable.server
 
 import com.typesafe.config.ConfigFactory
 
-/**
- * Helper object for accessing the application configuration.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Helper object for accessing the application configuration.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 object Configuration {
   val UserSessionServicePathElement = "userSessionService"
   val UserSessionPartitionPathElement = "userSessionPartition"

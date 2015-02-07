@@ -26,15 +26,14 @@ import scalafx.Includes._
 import scalafx.scene.Parent
 import scalafxml.core.{ ControllerDependencyResolver, FXMLView }
 
-/**
- * Client utilities.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Client utilities.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 package object client {
 
   def loadFxmlFile(resourceName: String, dependencies: ControllerDependencyResolver): Parent = {
-    def resource = getClass.getResource(resourceName)
+      def resource = getClass.getResource(resourceName)
     if (resource == null) {
       throw new IOException(s"Cannot load resource: $resourceName")
     }
@@ -67,14 +66,14 @@ package object client {
 
   def nodeLookup[T](parent: javafx.scene.Node, clazz: Class[T]): Option[T] = {
 
-    def seqLookup(nodes: List[javafx.scene.Node]): Option[T] = {
-      nodes match {
-        case node :: _ if node.getClass.isAssignableFrom(clazz) ⇒ Some(node.asInstanceOf[T])
-        case (node: javafx.scene.Parent) :: rest ⇒ seqLookup(node.getChildrenUnmodifiable.toList ::: rest)
-        case _ :: rest ⇒ seqLookup(rest)
-        case Nil ⇒ None
+      def seqLookup(nodes: List[javafx.scene.Node]): Option[T] = {
+        nodes match {
+          case node :: _ if node.getClass.isAssignableFrom(clazz) ⇒ Some(node.asInstanceOf[T])
+          case (node: javafx.scene.Parent) :: rest ⇒ seqLookup(node.getChildrenUnmodifiable.toList ::: rest)
+          case _ :: rest ⇒ seqLookup(rest)
+          case Nil ⇒ None
+        }
       }
-    }
 
     seqLookup(List(parent))
   }

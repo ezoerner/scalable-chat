@@ -21,11 +21,10 @@ import akka.actor.{ ActorLogging, Actor }
 import scalable.infrastructure.api.ResultStatus.ResultStatus
 import scalafx.stage.Stage
 
-/**
- * Actor trait to handle client-side login events.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Actor trait to handle client-side login events.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 trait LoginHandler {
   this: Actor with ActorLogging ⇒
 

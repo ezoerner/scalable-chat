@@ -27,11 +27,10 @@ import javafx.concurrent.Worker.State
 import scala.collection.JavaConverters._
 import scalafx.application.Platform
 
-/**
- * Code adapted from <a href="https://github.com/frtj/javafx_examples">github.com/frtj/javafx_examples</a>
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Code adapted from <a href="https://github.com/frtj/javafx_examples">github.com/frtj/javafx_examples</a>
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 object Browser {
   private val ContentId = "browser_content"
   def getHtml(content: String): String = {

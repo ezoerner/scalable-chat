@@ -32,11 +32,10 @@ import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
 import scalafxml.core.{ DependenciesByType, FXMLLoader }
 
-/**
- * Main entry point of client application.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Main entry point of client application.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 
 class Main extends JFXApp {
   lazy val actorSystem = ActorSystem("Main")

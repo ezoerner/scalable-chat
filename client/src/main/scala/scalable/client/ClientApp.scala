@@ -34,11 +34,10 @@ import scalafx.scene.Scene
 import scalafx.stage.Stage
 import scalafxml.core.{ DependenciesByType, FXMLLoader }
 
-/**
- * Root actor, used for tracking the user's client session information.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Root actor, used for tracking the user's client session information.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 object ClientApp {
   val path = "root"
   def props(loginListener: LoginListener) = Props(new ClientApp(loginListener))

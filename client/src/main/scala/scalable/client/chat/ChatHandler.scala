@@ -25,11 +25,10 @@ import scala.concurrent.duration._
 import scalable.client._
 import scalable.infrastructure.api._
 
-/**
- * Actor trait to handle client-side chat events for all chat rooms.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Actor trait to handle client-side chat events for all chat rooms.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 
 trait ChatHandler {
   this: Actor with ActorLogging ⇒

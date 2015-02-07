@@ -25,11 +25,10 @@ import scala.util.Random
 import scalable.infrastructure.api._
 import scalable.infrastructure.tcp.SimpleBuffer
 
-/**
- * Tcp Client.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Tcp Client.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 object TcpClient {
   def props(systemListener: ActorRef) = Props(new TcpClient(systemListener))
   val path = "tcp"
@@ -45,7 +44,7 @@ class TcpClient(systemListener: ActorRef) extends Actor with ActorLogging {
   private def resetRetryCount() = retryCount = 0
 
   private def exponentialBackOff(): FiniteDuration = {
-    def nextDelay(r: Int) = (scala.math.pow(2, r - 1).round * 100 * (Random.nextDouble + 1)).milliseconds
+      def nextDelay(r: Int) = (scala.math.pow(2, r - 1).round * 100 * (Random.nextDouble + 1)).milliseconds
     val delay = if (retryCount == 0) Duration.Zero else nextDelay(retryCount)
     retryCount = retryCount + 1
     log.info(s"Reconnect attempt #$retryCount after ${delay.toMillis / 1000.0f} seconds...")

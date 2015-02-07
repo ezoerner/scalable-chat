@@ -18,11 +18,10 @@ package scalable.client.chat
 
 import scalafx.stage.Stage
 
-/**
- * Trait for controllers that control chat rooms.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Trait for controllers that control chat rooms.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 trait ChatController {
 
   def setStageAndSetupListeners(stage: Stage): Unit

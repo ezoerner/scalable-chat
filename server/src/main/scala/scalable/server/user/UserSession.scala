@@ -21,20 +21,19 @@ import akka.actor._
 import scalable.infrastructure.api.ResultStatus._
 import scalable.infrastructure.api.{ AskLogin, LoginResult }
 
-/**
- * State for a registered user (whether currently online or not).
- * scalable-chat #27
- * TODO: make this a PersistentActor
- *
- * scalable-chat #28
- * TODO this needs to be extended to support multiple points of presence or at least to reinitialize the new
- * connection when dropping an old one so, e.g. the message history is sent to the new connection
- *
- * scalable-chat #29
- * TODO: Timeout connection if idle
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** State for a registered user (whether currently online or not).
+  * scalable-chat #27
+  * TODO: make this a PersistentActor
+  *
+  * scalable-chat #28
+  * TODO this needs to be extended to support multiple points of presence or at least to reinitialize the new
+  * connection when dropping an old one so, e.g. the message history is sent to the new connection
+  *
+  * scalable-chat #29
+  * TODO: Timeout connection if idle
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 object UserSession {
   def props(login: AskLogin) =
     Props(new UserSession(login.username, login.password))
