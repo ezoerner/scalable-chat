@@ -2,24 +2,29 @@
 
 ### What is this repository for? ###
 
-* A sample multiuser application with a scalable architecture.
+* A demo multiuser application with a scalable architecture.
 * A chat room application that demonstrates akka-persistence by storing chat history
+* TO DO: Chat room libraries for embedding chat in other applications
 
 ### Technology Stack ###
 
 * ScalaFX client
 * Akka in both client and server
-* Akka I/O used for client server communications
+* Akka Streams and Akka I/O used for client server communications
 * Akka Cluster with cluster-aware routing
 * Akka Persistence with Cassandra
 * Akka Testkit and Specs2 testing
 
-### Future ###
-The plan is instead of using cluster-aware routing for users and chatrooms, use Akka Cluster Sharding in combination with akka-persistence.
+### Future Plans ###
+Instead of using cluster-aware routing for users and chatrooms,
+use Akka Cluster Sharding in combination with akka-persistence.
 
-Also, instead of using Akka TCP sockets, use Akka HTTP (built on Reactive Streams) for communication between client and server.
+Also, instead of using Akka TCP sockets, use Akka HTTP with websockets for
+communication between client and server.
 
-### How do I get set up? ###
+Build chatroom functionality into libraries that can be embedded in other applications.
+
+### Running ###
 
 * Requires Java 8 (though the project is written entirely in Scala)
 * Configuration files are in `server/src/main/resources/application.conf` and `client/src/main/resources/application.conf` for server and client respectively.
@@ -31,7 +36,3 @@ Also, instead of using Akka TCP sockets, use Akka HTTP (built on Reactive Stream
 * Database Configuration: TBD
 * How to run tests: `./activator test`
 * Deployment instructions: TBD
-
-### Who do I talk to? ###
-
-* Project Owner: [ezoerner](https://bitbucket.org/ezoerner)
