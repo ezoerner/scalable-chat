@@ -1,7 +1,5 @@
 # Scalable Chat #
 
-### What is this repository for? ###
-
 * A demo multiuser application with a scalable architecture.
 * A chat room application that demonstrates akka-persistence by storing chat history
 * TO DO: Chat room libraries for embedding chat in other applications
