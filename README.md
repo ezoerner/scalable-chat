@@ -9,6 +9,7 @@
 * ScalaFX front end
 * Akka in both client and server
 * Akka Streams and Akka I/O used for client server communications
+  * Currently there is an `akka-streams` branch in progress for introducing akka-streams to replace straight akka-I/O.
 * Akka Cluster with cluster-aware routing
 * Akka Persistence with Cassandra
 * Akka Testkit and Specs2 testing
@@ -23,6 +24,10 @@ communication between client and server.
 Build chatroom functionality into libraries that can be embedded in other applications.
 
 Build an additional browser-based JavaScript front end, perhaps using Scala.js.
+
+Make logins more secure.
+
+See the [Issues](https://github.com/ezoerner/scalable-chat/issues) for other planned improvements.
 
 ### Running ###
 
