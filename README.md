@@ -9,7 +9,7 @@
 * ScalaFX front end
 * Akka in both client and server
 * Akka Streams and Akka I/O used for client server communications
-  * Currently there is an `akka-streams` branch in progress for introducing akka-streams to replace straight akka-I/O.
+  * Currently there is an `akka-streams` branch in progress for introducing akka-streams to replace straight akka-io.
 * Akka Cluster with cluster-aware routing
 * Akka Persistence with Cassandra
 * Akka Testkit and Specs2 testing
