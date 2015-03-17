@@ -34,7 +34,7 @@ See the [Issues](https://github.com/ezoerner/scalable-chat/issues) for other pla
 * Requires Java 8 (though the project is written entirely in Scala)
 * Configuration files are in `server/src/main/resources/application.conf` and `client/src/main/resources/application.conf` for server and client respectively.
   This is where the IP address and/or port can be changed for the server socket.
-* To run the server:  `./activator server/run`
+* To run the server:  `./activator server/run`  (or use your own activator installation)
 * To run a ScalaFX client:  `./activator client/run`
     * Note that there currently is no separate registration step. If this is the first time logging in for a user, just type in a new password at the login prompt.
 * Dependencies: akka , cassandra, scalafx, scalafxml
