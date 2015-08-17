@@ -23,11 +23,10 @@ import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.duration._
 
-/**
- * A tiny class that can be used as a Specs2 'context'.
- * Thanks to Age Mooij for posting the example at
- * <a href="http://blog.xebia.com/2012/10/01/testing-akka-with-specs2/">http://blog.xebia.com/2012/10/01/testing-akka-with-specs2/</a>
- */
+/** A tiny class that can be used as a Specs2 'context'.
+  * Thanks to Age Mooij for posting the example at
+  * <a href="http://blog.xebia.com/2012/10/01/testing-akka-with-specs2/">http://blog.xebia.com/2012/10/01/testing-akka-with-specs2/</a>
+  */
 abstract class AkkaTestkitSpecs2Support extends TestKit(ActorSystem("test"))
     with After
     with ImplicitSender {

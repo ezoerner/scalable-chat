@@ -16,7 +16,7 @@
 
 package scalable.client
 
-import javafx.{ stage ⇒ jfxs }
+import javafx.{stage => jfxs}
 
 import akka.actor.ActorSystem
 import akka.event.Logging
@@ -29,8 +29,8 @@ import scalable.messaging.api.AskLogin
 import scalable.messaging.api.ResultStatus._
 import scalafx.application.Platform
 import scalafx.event.ActionEvent
-import scalafx.scene.control.{ ToggleButton, Button, TextField }
-import scalafx.scene.layout.{ VBox, GridPane }
+import scalafx.scene.control.{TextField, ToggleButton}
+import scalafx.scene.layout.{GridPane, VBox}
 import scalafx.scene.text.Text
 import scalafx.stage.Stage
 import scalafxml.core.macros.sfxml
@@ -40,16 +40,18 @@ import scalafxml.core.macros.sfxml
   * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
   */
 @sfxml
-class LoginController(private val usernameField: TextField,
-                      private val passwordField: TextField,
-                      private val failedText: Text,
-                      private val timedOutText: Text,
-                      private val root: GridPane,
-                      private val actorSystem: ActorSystem,
-                      private val advancedView: VBox,
-                      private val advancedToggle: ToggleButton,
-                      private val hostText: TextField,
-                      private val portText: TextField) extends LoginListener {
+class LoginController(
+  private val usernameField:  TextField,
+  private val passwordField:  TextField,
+  private val failedText:     Text,
+  private val timedOutText:   Text,
+  private val root:           GridPane,
+  private val actorSystem:    ActorSystem,
+  private val advancedView:   VBox,
+  private val advancedToggle: ToggleButton,
+  private val hostText:       TextField,
+  private val portText:       TextField
+) extends LoginListener {
   private val log = Logging(actorSystem, this.getClass)
   @volatile private var waiting = true
 
@@ -69,10 +71,14 @@ class LoginController(private val usernameField: TextField,
     timedOutText.visible.value = false
     val appSupervisor = appSupervisorSelection(actorSystem)
     appSupervisor !
-      (hostText.text.value,
+      (
+        hostText.text.value,
         Try(portText.text.value.toInt).getOrElse(Configuration.portTcp),
-        AskLogin(usernameField.text.value,
-          passwordField.text.value))
+        AskLogin(
+          usernameField.text.value,
+          passwordField.text.value
+        )
+      )
 
     // start a timer to timeout if no response is received
     actorSystem.scheduler.scheduleOnce(5.seconds) {

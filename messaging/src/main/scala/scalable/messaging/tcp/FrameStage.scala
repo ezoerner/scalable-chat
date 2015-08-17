@@ -1,9 +1,8 @@
 package scalable.messaging.tcp
 
-import akka.stream.stage.Context
-import akka.stream.stage.Directive
-import akka.stream.stage.PushStage
+import akka.stream.stage.{Context, Directive, PushStage}
 import akka.util.ByteString
+import org.scalactic.TypeCheckedTripleEquals._
 
 /** Stage for extracting a ByteString message frame from a flow of bytes.
   * Each frame should start with a header consisting of an integer length
@@ -14,10 +13,12 @@ final class FrameStage extends PushStage[Byte, ByteString] {
   private val payloadBuilder = ByteString.newBuilder
   private var payloadLength: Int = _
 
-  override def onPush(elem: Byte,
-                      ctx: Context[ByteString]): Directive = {
+  override def onPush(
+    elem: Byte,
+    ctx:  Context[ByteString]
+  ): Directive = {
 
-      def headerIsComplete = lengthBuilder.length == Integer.BYTES
+      def headerIsComplete = lengthBuilder.length === Integer.BYTES
 
       def extractPayloadLength(): Unit =
         payloadLength = lengthBuilder.result().iterator.getInt

@@ -18,17 +18,16 @@ package scalable.server.tcp
 
 import java.net.InetSocketAddress
 
-import akka.actor.{ Actor, ActorRef, Props }
-import akka.io.{ IO, Tcp }
+import akka.actor.{Actor, ActorRef, Props}
+import akka.io.{IO, Tcp}
 
 import scalable.messaging.api.SerializableMessage
 import scalable.messaging.tcp.SimpleBuffer
 
-/**
- * Test tcp client.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Test tcp client.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 object TestClient {
   def props(remote: InetSocketAddress, replies: ActorRef) =
     Props(classOf[TestClient], remote, replies)

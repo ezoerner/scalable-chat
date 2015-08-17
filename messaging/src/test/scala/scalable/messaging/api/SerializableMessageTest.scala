@@ -18,17 +18,16 @@ package scalable.messaging.api
 
 import java.util.UUID
 
-import akka.actor.{ Actor, ActorSystem }
+import akka.actor.{Actor, ActorSystem}
 import akka.util.ByteString
 import org.specs2.mutable.Specification
 
 import scalable.messaging.api.ResultStatus._
 
-/**
- * Tests serialization and deserialization of messages
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Tests serialization and deserialization of messages
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 class SerializableMessageTest extends Specification {
   sequential
 

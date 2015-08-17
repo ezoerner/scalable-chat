@@ -17,23 +17,24 @@
 package scalable.client
 
 import java.text.DateFormat
-import java.util.{ Date, UUID }
-import javafx.beans.value.{ ChangeListener, ObservableValue }
+import java.util.{Date, UUID}
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
+import javafx.scene.{control => jfxsc, web => jfxsw}
 import javafx.stage.WindowEvent
-import javafx.scene.{ control ⇒ jfxsc }
-import javafx.scene.{ web ⇒ jfxsw }
-import javafx.{ scene ⇒ jfxs }
+import javafx.{scene => jfxs}
 
 import akka.actor.ActorSystem
 import akka.event.Logging
 
 import scala.collection.JavaConverters._
 import scala.collection.SortedMap
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scalable.client.chat.views.Browser
-import scalable.client.chat.{ ChatController, ChatHandler, ChatListener }
-import scalable.client.login.{ LoginHandler, LoginListener }
+import scalable.client.chat.{ChatController, ChatHandler, ChatListener}
+import scalable.client.login.{LoginHandler, LoginListener}
 import scalable.messaging.api.ResultStatus.ResultStatus
 import scalable.messaging.api._
 import scalafx.Includes._
@@ -45,27 +46,27 @@ import scalafx.scene.text.Text
 import scalafx.scene.web._
 import scalafx.stage.Stage
 import scalafxml.core.macros.sfxml
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /** Controller for Lobby window.
   *
   * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
   */
 @sfxml
-class LobbyController(private val onlineTitledPane: TitledPane,
-                      private val accordion: Accordion,
-                      private val actorSystem: ActorSystem,
-                      private val chatHandler: ChatHandler,
-                      private val loginHandler: LoginHandler,
-                      private val usernameText: Text,
-                      private val username: String,
-                      private val onlineListView: ListView[String],
-                      private val chatEditor: HTMLEditor,
-                      private val sendChat: Button,
-                      private val webViewParent: AnchorPane,
-                      private val chatScrollPane: ScrollPane,
-                      private val sendOnEnter: CheckBox)
+class LobbyController(
+  private val onlineTitledPane: TitledPane,
+  private val accordion:        Accordion,
+  private val actorSystem:      ActorSystem,
+  private val chatHandler:      ChatHandler,
+  private val loginHandler:     LoginHandler,
+  private val usernameText:     Text,
+  private val username:         String,
+  private val onlineListView:   ListView[String],
+  private val chatEditor:       HTMLEditor,
+  private val sendChat:         Button,
+  private val webViewParent:    AnchorPane,
+  private val chatScrollPane:   ScrollPane,
+  private val sendOnEnter:      CheckBox
+)
     extends ChatListener with LoginListener with ChatController {
   private val initialHtml = Browser.getHtml("")
   private val log = Logging(actorSystem, this.getClass)

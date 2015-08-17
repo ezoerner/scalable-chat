@@ -1,19 +1,18 @@
 package scalable.server.user
 
 import akka.testkit.TestProbe
-import org.specs2.time.NoTimeConversions
 import org.specs2.mutable.Specification
+import org.specs2.time.NoTimeConversions
 
-import scalable.messaging.api.{ LoginResult, AskLogin }
-import scalable.server.AkkaTestkitSpecs2Support
 import scala.concurrent.duration._
 import scalable.messaging.api.ResultStatus._
+import scalable.messaging.api.{AskLogin, LoginResult}
+import scalable.server.AkkaTestkitSpecs2Support
 
-/**
- * Tests for UserSessions.
- *
- * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
- */
+/** Tests for UserSessions.
+  *
+  * @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
+  */
 
 abstract class TestContext extends AkkaTestkitSpecs2Support {
 
