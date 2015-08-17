@@ -1,6 +1,6 @@
 package scalable.messaging.tcp
 
-import akka.stream.stage.{Context, Directive, PushStage}
+import akka.stream.stage.{Context, PushStage, SyncDirective}
 import akka.util.ByteString
 import org.scalactic.TypeCheckedTripleEquals._
 
@@ -16,14 +16,14 @@ final class FrameStage extends PushStage[Byte, ByteString] {
   override def onPush(
     elem: Byte,
     ctx:  Context[ByteString]
-  ): Directive = {
+  ): SyncDirective = {
 
       def headerIsComplete = lengthBuilder.length === Integer.BYTES
 
       def extractPayloadLength(): Unit =
         payloadLength = lengthBuilder.result().iterator.getInt
 
-      def addToPayload(): Directive = {
+      def addToPayload(): SyncDirective = {
         payloadBuilder.putByte(elem)
         if (payloadBuilder.length == payloadLength) {
           val bs = payloadBuilder.result()
@@ -34,7 +34,7 @@ final class FrameStage extends PushStage[Byte, ByteString] {
           ctx.pull()
       }
 
-      def addToHeader(): Directive = {
+      def addToHeader(): SyncDirective = {
         lengthBuilder.putByte(elem)
         if (lengthBuilder.length == 4 && {
           extractPayloadLength()

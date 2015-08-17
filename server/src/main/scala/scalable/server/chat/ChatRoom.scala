@@ -34,8 +34,8 @@ case class RemoveParticipant(username: String) extends Event
 case class AddChat(chat: Chat) extends Event
 
 case class ChatRoomState(
-  participants:   Map[String, ActorRef] = Map.empty,
-  messageHistory: SortedSet[Chat]       = ChatRoom.newMessageHistory
+    participants:   Map[String, ActorRef] = Map.empty,
+    messageHistory: SortedSet[Chat]       = ChatRoom.newMessageHistory
 ) {
   def updated(event: Event): ChatRoomState = event match {
     case AddParticipant(username, connector) ⇒ copy(participants = participants + (username → connector))

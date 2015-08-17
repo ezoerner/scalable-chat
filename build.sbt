@@ -33,7 +33,7 @@ lazy val commonSubmoduleDependencies = libraryDependencies ++= Seq(
 lazy val messaging = project.settings(commonSettings: _*)
   .settings(commonSubmoduleDependencies)
   .settings(libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-M2"
+    "com.typesafe.akka" %% "akka-stream-experimental" % "1.0"
   ))
 
 // Fork a new JVM for 'run' and 'test:run', to avoid JavaFX double initialization problems
@@ -53,7 +53,6 @@ lazy val server = project.dependsOn(messaging)
   .settings(commonSubmoduleDependencies)
   .settings(fork := true,
             libraryDependencies ++= Seq(
-                  "com.typesafe.akka"      %% "akka-persistence-experimental" % akkaVersion,
                   "com.github.krasserm"    %% "akka-persistence-cassandra"    % "0.3.4",
                   "com.typesafe.akka"      %% "akka-cluster"                  % akkaVersion,
                   "com.typesafe.akka"      %% "akka-testkit"                  % akkaVersion   % "test"))
