@@ -8,7 +8,7 @@ import org.scalactic.TypeCheckedTripleEquals._
   * Each frame should start with a header consisting of an integer length
   * of the following payload.
   */
-final class FrameStage extends PushStage[Byte, ByteString] {
+final class MessageStage extends PushStage[Byte, ByteString] {
   private val lengthBuilder = ByteString.newBuilder
   private val payloadBuilder = ByteString.newBuilder
   private var payloadLength: Int = _

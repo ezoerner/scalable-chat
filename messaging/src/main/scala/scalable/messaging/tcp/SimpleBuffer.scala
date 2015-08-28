@@ -17,7 +17,7 @@
 package scalable.messaging.tcp
 
 import akka.actor.ActorSystem
-import akka.util.{ ByteString, ByteStringBuilder }
+import akka.util.{ByteString, ByteStringBuilder}
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -26,8 +26,6 @@ import scalable.messaging.api.SerializableMessage
 /** @author Eric Zoerner <a href="mailto:eric.zoerner@gmail.com">eric.zoerner@gmail.com</a>
   */
 class SimpleBuffer {
-
-  implicit val byteOrder = java.nio.ByteOrder.BIG_ENDIAN
 
   private var buffer: ByteString = ByteString()
   private var _expectedByteCount: Int = 0
