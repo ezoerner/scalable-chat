@@ -53,7 +53,7 @@ lazy val server = project.dependsOn(messaging)
   .settings(commonSubmoduleDependencies)
   .settings(fork := true,
             libraryDependencies ++= Seq(
-                  "com.github.krasserm"    %% "akka-persistence-cassandra"    % "0.3.4",
+                  "com.github.krasserm"    %% "akka-persistence-cassandra"    % "0.3.9",
                   "com.typesafe.akka"      %% "akka-cluster"                  % akkaVersion,
                   "com.typesafe.akka"      %% "akka-testkit"                  % akkaVersion   % "test"))
 
