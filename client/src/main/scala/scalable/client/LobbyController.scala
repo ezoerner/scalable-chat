@@ -21,9 +21,9 @@ import java.util.{Date, UUID}
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
-import javafx.scene.{control => jfxsc, web => jfxsw}
+import javafx.scene.{control ⇒ jfxsc, web ⇒ jfxsw}
 import javafx.stage.WindowEvent
-import javafx.{scene => jfxs}
+import javafx.{scene ⇒ jfxs}
 
 import akka.actor.ActorSystem
 import akka.event.Logging
@@ -54,18 +54,18 @@ import scalafxml.core.macros.sfxml
 @sfxml
 class LobbyController(
   private val onlineTitledPane: TitledPane,
-  private val accordion:        Accordion,
-  private val actorSystem:      ActorSystem,
-  private val chatHandler:      ChatHandler,
-  private val loginHandler:     LoginHandler,
-  private val usernameText:     Text,
-  private val username:         String,
-  private val onlineListView:   ListView[String],
-  private val chatEditor:       HTMLEditor,
-  private val sendChat:         Button,
-  private val webViewParent:    AnchorPane,
-  private val chatScrollPane:   ScrollPane,
-  private val sendOnEnter:      CheckBox
+  private val accordion: Accordion,
+  private val actorSystem: ActorSystem,
+  private val chatHandler: ChatHandler,
+  private val loginHandler: LoginHandler,
+  private val usernameText: Text,
+  private val username: String,
+  private val onlineListView: ListView[String],
+  private val chatEditor: HTMLEditor,
+  private val sendChat: Button,
+  private val webViewParent: AnchorPane,
+  private val chatScrollPane: ScrollPane,
+  private val sendOnEnter: CheckBox
 )
     extends ChatListener with LoginListener with ChatController {
   private val initialHtml = Browser.getHtml("")

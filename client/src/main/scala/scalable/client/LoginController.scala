@@ -16,8 +16,6 @@
 
 package scalable.client
 
-import javafx.{stage => jfxs}
-
 import akka.actor.ActorSystem
 import akka.event.Logging
 
@@ -41,16 +39,16 @@ import scalafxml.core.macros.sfxml
   */
 @sfxml
 class LoginController(
-    private val usernameField:  TextField,
-    private val passwordField:  TextField,
-    private val failedText:     Text,
-    private val timedOutText:   Text,
-    private val root:           GridPane,
-    private val actorSystem:    ActorSystem,
-    private val advancedView:   VBox,
+    private val usernameField: TextField,
+    private val passwordField: TextField,
+    private val failedText: Text,
+    private val timedOutText: Text,
+    private val root: GridPane,
+    private val actorSystem: ActorSystem,
+    private val advancedView: VBox,
     private val advancedToggle: ToggleButton,
-    private val hostText:       TextField,
-    private val portText:       TextField
+    private val hostText: TextField,
+    private val portText: TextField
 ) extends LoginListener {
   private val log = Logging(actorSystem, this.getClass)
   @volatile private var waiting = true

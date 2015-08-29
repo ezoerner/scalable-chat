@@ -17,7 +17,6 @@
 package scalable.client
 
 import javafx.scene.Parent
-import javafx.{ scene ⇒ jfxs }
 
 import akka.actor._
 import com.typesafe.config.ConfigFactory
@@ -25,12 +24,11 @@ import com.typesafe.config.ConfigFactory
 import scala.reflect.runtime.universe.typeOf
 import scala.util.control.NonFatal
 import scalable.client.login.LoginListener
-import scalable.messaging.api.ResultStatus._
 import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
-import scalafxml.core.{ DependenciesByType, FXMLLoader }
+import scalafxml.core.{DependenciesByType, FXMLLoader}
 
 /** Main entry point of client application.
   *
@@ -40,7 +38,7 @@ import scalafxml.core.{ DependenciesByType, FXMLLoader }
 class Main extends JFXApp {
   lazy val actorSystem = ActorSystem("Main")
 
-  def dependencies = new DependenciesByType(Map(typeOf[ActorSystem] -> actorSystem))
+  def dependencies = new DependenciesByType(Map(typeOf[ActorSystem] → actorSystem))
 
   val loader: FXMLLoader = new FXMLLoader(getClass.getResource("Login.fxml"), dependencies)
   val root: Parent = loader.load()

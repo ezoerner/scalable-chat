@@ -19,7 +19,7 @@ package scalable.server.user
 import akka.actor._
 
 import scalable.messaging.api.ResultStatus._
-import scalable.messaging.api.{ AskLogin, LoginResult }
+import scalable.messaging.api.{AskLogin, LoginResult}
 
 /** State for a registered user (whether currently online or not).
   * scalable-chat #27

@@ -37,8 +37,10 @@ class SerializableMessageTest extends Specification {
 
   def testMessages(actorSystem: ActorSystem): List[SerializableMessage] = {
     List(
-      RoomInfo("room", List(Chat(Some(UUID.randomUUID()), "sender", "room", "html"),
-        Chat(Some(UUID.randomUUID()), "sender", "room", "html")),
+      RoomInfo("room", List(
+        Chat(Some(UUID.randomUUID()), "sender", "room", "html"),
+        Chat(Some(UUID.randomUUID()), "sender", "room", "html")
+      ),
         List("part1", "part2")),
       LoginResult(Ok, "user"),
       AskLogin("user", "password"),

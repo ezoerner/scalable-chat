@@ -17,13 +17,14 @@
 package scalable.client.chat.views
 
 import java.util
-import javafx.beans.value.{ ObservableValue, ChangeListener }
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ListChangeListener
-import javafx.geometry.{ VPos, HPos, Insets }
+import javafx.concurrent.Worker.State
+import javafx.geometry.{HPos, Insets, VPos}
 import javafx.scene.Node
 import javafx.scene.layout.Region
 import javafx.scene.web.WebView
-import javafx.concurrent.Worker.State
+
 import scala.collection.JavaConverters._
 import scalafx.application.Platform
 

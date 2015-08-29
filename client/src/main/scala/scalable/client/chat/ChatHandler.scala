@@ -18,7 +18,7 @@ package scalable.client.chat
 
 import java.util.UUID
 
-import akka.actor.{ Actor, ActorLogging }
+import akka.actor.{Actor, ActorLogging}
 import akka.util.Timeout
 
 import scala.concurrent.duration._

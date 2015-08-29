@@ -1,26 +1,11 @@
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
-
-import scalariform.formatter.preferences._
-
 lazy val akkaVersion = "2.3.12"
 
-lazy val commonSettings = scalariformSettings ++ resolverSettings ++
-                          releaseSettings ++  // ++ publishSettings
+lazy val commonSettings = releaseSettings ++  // ++ publishSettings
                           net.virtualvoid.sbt.graph.Plugin.graphSettings ++
                           Seq(scalaVersion := "2.11.6",
                               scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8"),
                               parallelExecution in Test := false,
-                              organization := "scalable_chat",
-                              ScalariformKeys.preferences := FormattingPreferences()
-                                .setPreference(AlignParameters, true)
-                                .setPreference(RewriteArrowSymbols, false)
-                                .setPreference(CompactControlReadability, true)
-                                .setPreference(DoubleIndentClassDeclaration, true)
-                                .setPreference(PreserveDanglingCloseParenthesis, true)
-                                .setPreference(AlignSingleLineCaseStatements, true)
-                                .setPreference(IndentLocalDefs, true)
-                                .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
-                                .setPreference(MultilineScaladocCommentsStartOnFirstLine, true))
+                              organization := "scalable_chat")
 
 lazy val resolverSettings = Seq(resolvers ++= Seq("krasserm at bintray" at "http://dl.bintray.com/krasserm/maven"))
 

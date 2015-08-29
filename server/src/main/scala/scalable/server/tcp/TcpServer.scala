@@ -17,7 +17,7 @@
 package scalable.server.tcp
 
 import akka.actor._
-import akka.util.{ ByteStringBuilder, ByteString }
+import akka.util.ByteString
 
 import scalable.messaging.api._
 import scalable.messaging.tcp.SimpleBuffer

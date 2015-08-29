@@ -18,8 +18,8 @@ package scalable.server.tcp
 
 import java.net.InetSocketAddress
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
-import akka.io.{ IO, Tcp }
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.io.{IO, Tcp}
 
 import scalable.server.Configuration
 

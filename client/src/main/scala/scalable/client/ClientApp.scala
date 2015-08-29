@@ -18,7 +18,7 @@ package scalable.client
 
 import java.net.InetSocketAddress
 import javafx.scene.Parent
-import javafx.{scene => jfxs}
+import javafx.{scene ⇒ jfxs}
 
 import akka.actor._
 import akka.io.Tcp.{Connect, Connected, ConnectionClosed}

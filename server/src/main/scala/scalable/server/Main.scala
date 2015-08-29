@@ -19,8 +19,8 @@ package scalable.server
 import akka.actor._
 import com.typesafe.config.ConfigFactory
 
-import scalable.server.user.{ UserSessionPartition, UserSessionService }
 import scalable.server.Configuration._
+import scalable.server.user.{UserSessionPartition, UserSessionService}
 
 /** Main entry points for the server.
   *

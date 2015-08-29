@@ -15,7 +15,7 @@ final class MessageStage extends PushStage[Byte, ByteString] {
 
   override def onPush(
     elem: Byte,
-    ctx:  Context[ByteString]
+    ctx: Context[ByteString]
   ): SyncDirective = {
 
       def headerIsComplete = lengthBuilder.length === Integer.BYTES

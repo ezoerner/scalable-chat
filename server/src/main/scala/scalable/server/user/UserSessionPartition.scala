@@ -1,6 +1,6 @@
 package scalable.server.user
 
-import akka.actor.{ Actor, ActorLogging, ActorRef }
+import akka.actor.{Actor, ActorLogging, ActorRef}
 
 import scala.collection.mutable
 import scalable.messaging.api.AskLogin

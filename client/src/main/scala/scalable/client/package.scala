@@ -17,14 +17,15 @@
 package scalable
 
 import java.io.IOException
-import java.util.{ Calendar, TimeZone, UUID }
+import java.util.{Calendar, TimeZone, UUID}
 
-import akka.actor.{ ActorRefFactory, ActorSelection }
+import akka.actor.{ActorRefFactory, ActorSelection}
 
+import scala.annotation.tailrec
 import scalable.client.tcp.TcpClient
 import scalafx.Includes._
 import scalafx.scene.Parent
-import scalafxml.core.{ ControllerDependencyResolver, FXMLView }
+import scalafxml.core.{ControllerDependencyResolver, FXMLView}
 
 /** Client utilities.
   *
@@ -66,6 +67,7 @@ package object client {
 
   def nodeLookup[T](parent: javafx.scene.Node, clazz: Class[T]): Option[T] = {
 
+      @tailrec
       def seqLookup(nodes: List[javafx.scene.Node]): Option[T] = {
         nodes match {
           case node :: _ if node.getClass.isAssignableFrom(clazz) ⇒ Some(node.asInstanceOf[T])

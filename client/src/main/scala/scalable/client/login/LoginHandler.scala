@@ -16,7 +16,7 @@
 
 package scalable.client.login
 
-import akka.actor.{ ActorLogging, Actor }
+import akka.actor.{Actor, ActorLogging}
 
 import scalable.messaging.api.ResultStatus.ResultStatus
 import scalafx.stage.Stage
