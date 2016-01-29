@@ -1,16 +1,18 @@
 # Scalable Chat #
 
 * A demo multiuser application with a scalable architecture.
-* A chat room application that demonstrates akka-persistence by storing chat history
+* A chat room application
+* Demonstrates akka-persistence by storing chat history
+* Demonstrates akka-http for client/server communications with WebSockets
 
 ### Technology Stack ###
 
 * ScalaFX front end
 * Akka in both client and server
 * Akka Streams and Akka I/O used for client server communications
-  * Currently there is an `akka-streams` branch in progress for introducing akka-streams to replace straight akka-io.
+  * Currently there is an `akka-streams` branch in progress for introducing akka-http and akka-streams to replace direct use of akka-io.
 * Akka Cluster with cluster-aware routing
-* Akka Persistence with Cassandra
+* Event-sourceing using Akka Persistence with Cassandra
 * Akka Testkit and Specs2 testing
 
 ### Future Plans and Possibilities ###
