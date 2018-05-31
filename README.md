@@ -3,7 +3,13 @@
 * A demo multiuser application with a scalable architecture.
 * A chat room application
 * Demonstrates akka-persistence by storing chat history
-* Demonstrates akka-http for client/server communications with WebSockets
+* Demonstrates akka-http for client/server communications with WebSockets (not yet implemented, currently uses Akka TCP sockets)
+
+## UPDATE ##
+This project is no longer active.
+If I were to work further on it, the first thing I would do is remove `activator` and Cassandra, and probably use DynamoDB instead of Cassandra. Also, I would prefer ScalaTest over Specs2 for testing.
+
+In fact, if I were to start from scratch, I would write this in Haskell instead of Scala.
 
 ### Technology Stack ###
 
@@ -12,7 +18,7 @@
 * Akka Streams and Akka I/O used for client server communications
   * Currently there is an `akka-streams` branch in progress for introducing akka-http and akka-streams to replace direct use of akka-io.
 * Akka Cluster with cluster-aware routing
-* Event-sourceing using Akka Persistence with Cassandra
+* Event-sourcing using Akka Persistence with Cassandra
 * Akka Testkit and Specs2 testing
 
 ### Future Plans and Possibilities ###
